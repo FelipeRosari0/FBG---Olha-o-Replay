@@ -14,5 +14,8 @@ static/media/
 *.mp4
 *.mov
 
+# Server-side data (banco e mídia gerada)
+server/data/
+
 # Logs
 *.log
