@@ -1,0 +1,18 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Python server cache
+__pycache__/
+
+# Media placeholders (evitar arquivos grandes no repositório)
+static/media/
+*.mp4
+*.mov
+
+# Logs
+*.log

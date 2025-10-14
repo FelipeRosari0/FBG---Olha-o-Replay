@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 170">
+  <!-- Logo estilizada inspirada na imagem enviada -->
+  <defs>
+    <style>
+      .outline { stroke:#111; stroke-width:10; stroke-linejoin:round; }
+      .yellow { fill:#f5b531; }
+      .green { fill:#2e7d32; }
+      .red { fill:#e84d3c; }
+      .dark { fill:#111; }
+      .beige { fill:#f8ead3; }
+    </style>
+  </defs>
+
+  <!-- Fundo bege sutil -->
+  <rect x="0" y="0" width="460" height="170" rx="24" class="beige" />
+
+  <!-- Texto OLHA REPLAY com amarelo e contorno preto -->
+  <g font-family="Segoe UI, Roboto, Arial" font-weight="900" font-size="64">
+    <text x="24" y="78" class="yellow outline">OLHA</text>
+    <text x="24" y="150" class="yellow outline">REPLAY</text>
+  </g>
+
+  <!-- Bola com play vermelho -->
+  <g transform="translate(320, 25)">
+    <circle cx="48" cy="48" r="48" fill="#fff" class="outline"/>
+    <!-- Padrão simples de bola -->
+    <circle cx="48" cy="48" r="14" class="dark" />
+    <path d="M16,48 l20,-10 l0,20 Z" class="dark"/>
+    <path d="M80,48 l-20,-10 l0,20 Z" class="dark"/>
+    <!-- Botão play -->
+    <polygon points="40,32 40,64 66,48" class="red outline" />
+    <!-- Anel verde externo -->
+    <circle cx="48" cy="48" r="55" class="green" stroke="#111" stroke-width="8" fill="none"/>
+  </g>
+
+  <!-- Seta curva verde sob o texto -->
+  <path d="M160,155 C220,120 300,120 360,135" class="green outline" fill="none" stroke-width="12"/>
+  <polygon points="360,135 335,124 338,146" class="green outline" />
+</svg>

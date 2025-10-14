@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro • Olha o Replay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+  </head>
+  <body data-page="register">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top brand-header">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+          <img src="static/img/OLHA O REPLAY.jpg" alt="Olha o Replay" height="56" class="me-2">
+          <span>Olha o Replay</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0" id="navLinks">
+            <li class="nav-item"><a class="nav-link" href="search.html">Buscar Vídeos</a></li>
+            <li class="nav-item" id="navLogin"><a class="nav-link" href="login.html">Login</a></li>
+            <li class="nav-item" id="navRegister"><a class="nav-link active" href="register.html">Cadastrar</a></li>
+            <li class="nav-item dropdown d-none" id="navUser">
+              <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-user"></i> <span id="userName">Usuário</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <li><a class="dropdown-item" href="search.html">Meus Vídeos</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item" id="logoutBtn">Sair</button></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container" style="padding-top: 6rem; padding-bottom: 3rem; max-width: 520px;">
+      <h1 class="h3 mb-3 text-center">Criar conta</h1>
+
+      <div id="alertContainer"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="mb-3">
+          <label for="regUsername" class="form-label">Nome de usuário</label>
+          <input type="text" class="form-control" id="regUsername" placeholder="Seu nome" required>
+        </div>
+        <div class="mb-3">
+          <label for="regEmail" class="form-label">Email</label>
+          <input type="email" class="form-control" id="regEmail" placeholder="voce@exemplo.com" required>
+        </div>
+        <div class="mb-3">
+          <label for="regPassword" class="form-label">Senha</label>
+          <input type="password" class="form-control" id="regPassword" placeholder="••••••" required>
+        </div>
+        <div class="mb-3">
+          <label for="regConfirm" class="form-label">Confirmar senha</label>
+          <input type="password" class="form-control" id="regConfirm" placeholder="••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+      </form>
+
+      <p class="mt-3 text-center">Já tem conta? <a href="login.html">Entrar</a></p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white">
+      <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <span>© 2025 Olha o Replay.</span>
+        <div class="mt-3 mt-md-0">
+          <a href="index.html" class="text-white me-3">Início</a>
+          <a href="search.html" class="text-white me-3">Buscar Vídeos</a>
+          <a href="purchases.html" class="text-white me-3">Compras</a>
+          <a href="#" class="text-white">Contato</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/main.js"></script>
+  </body>
+</html>
