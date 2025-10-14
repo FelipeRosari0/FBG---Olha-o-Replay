@@ -1,5 +1,6 @@
 // Olha o Replay - Client-side app (sem backend)
 (function () {
+  const API_BASE = 'http://localhost:5000';
   const LS_KEYS = {
     users: 'or_users',
     currentUser: 'or_currentUser',
@@ -15,6 +16,7 @@
       { id: 'c4', name: 'Quadra Leste' },
       { id: 'c5', name: 'Quadra Oeste' },
     ],
+    serverVideos: [],
     videos: [
       {
         id: 'v1',
@@ -181,6 +183,40 @@
   // Courts helper (global)
   function findCourt(id) {
     return state.courts.find(c => c.id === id);
+  }
+
+  // Map server clip to UI video model
+  function clipToVideo(clip) {
+    const dateStr = (clip.recorded_at || '').slice(0, 10);
+    const durMs = Number(clip.duration_ms || 0);
+    const durLabel = durMs ? `${Math.round(durMs/1000)} s` : '30 s';
+    const courtId = clip.court_id || '';
+    const mediaUrl = clip.clip_url || null;
+    return {
+      id: `srv_${clip.id}`,
+      title: clip.event_type ? `Clip ${clip.event_type} • ${courtId}` : `Clip ${courtId || '#'+clip.id}`,
+      courtId: courtId,
+      date: dateStr || formatDateOffset(0),
+      start: null,
+      end: null,
+      duration: durLabel,
+      price: 5.0,
+      thumb: 'static/img/thumb_futebol.svg',
+      hasMedia: !!mediaUrl,
+      mediaUrl: mediaUrl,
+    };
+  }
+
+  async function loadServerClips(limit = 50) {
+    try {
+      const res = await fetch(`${API_BASE}/clips?limit=${limit}`);
+      const json = await res.json();
+      const items = Array.isArray(json.items) ? json.items : [];
+      state.serverVideos = items.map(clipToVideo);
+    } catch (e) {
+      console.warn('Falha ao buscar clips do servidor:', e);
+      state.serverVideos = [];
+    }
   }
 
   // Bootstrap alert helper
@@ -354,7 +390,7 @@
 
     listEl.innerHTML = '';
     ids.forEach(id => {
-      const v = state.videos.find(x => x.id === id);
+      const v = [...state.videos, ...state.serverVideos].find(x => x.id === id);
       if (!v) return;
       const col = document.createElement('div');
       col.className = 'col-md-4 mb-4';
@@ -364,7 +400,7 @@
           <div class="card-body d-flex flex-column">
             <h5 class="card-title">${v.title}</h5>
             <p class="card-text mb-2">
-              <span class="badge bg-primary me-2">${findCourt(v.courtId)?.name || ''}</span>
+              <span class="badge bg-primary me-2">${findCourt(v.courtId)?.name || v.courtId || ''}</span>
               <span class="text-muted">${v.date} • ${v.duration}</span>
             </p>
             <div class="mt-auto d-flex justify-content-between align-items-center">
@@ -386,7 +422,7 @@
       if (!btn) return;
       const id = btn.getAttribute('data-id');
       const action = btn.getAttribute('data-action');
-      const video = state.videos.find(v => v.id === id);
+      const video = [...state.videos, ...state.serverVideos].find(v => v.id === id);
       if (!video) return;
 
       if (action === 'preview') {
@@ -455,7 +491,7 @@
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">${v.title}</h5>
               <p class="card-text mb-2">
-                <span class="badge bg-primary me-2">${findCourt(v.courtId)?.name || ''}</span>
+                <span class="badge bg-primary me-2">${findCourt(v.courtId)?.name || v.courtId || ''}</span>
                 <span class="text-muted">${v.date} • ${v.duration}</span>
               </p>
               <div class="mt-auto d-flex justify-content-between align-items-center">
@@ -483,7 +519,8 @@
       const selDate = dateEl.value;
       const selStart = minutes(startEl.value);
       const selEnd = minutes(endEl.value);
-      const filtered = state.videos.filter(v => {
+      const pool = [...state.videos, ...state.serverVideos];
+      const filtered = pool.filter(v => {
         const okCourt = !selCourt || v.courtId === selCourt;
         const okDate = !selDate || v.date === selDate;
         const vStart = minutes(v.start); const vEnd = minutes(v.end);
@@ -495,7 +532,10 @@
 
     applyBtn.addEventListener('click', apply);
     clearBtn.addEventListener('click', () => { courtSel.value=''; dateEl.value=''; startEl.value=''; endEl.value=''; apply(); });
-    apply(); // initial render
+    (async () => {
+      await loadServerClips(50);
+      apply(); // initial render after fetching server clips
+    })();
 
     // Delegated actions
     listEl.addEventListener('click', (e) => {
@@ -503,7 +543,7 @@
       if (!btn) return;
       const id = btn.getAttribute('data-id');
       const action = btn.getAttribute('data-action');
-      const video = state.videos.find(v => v.id === id);
+      const video = [...state.videos, ...state.serverVideos].find(v => v.id === id);
       const user = getCurrentUser();
 
       if (action === 'preview') {
