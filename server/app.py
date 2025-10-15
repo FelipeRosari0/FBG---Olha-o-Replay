@@ -5,6 +5,8 @@ from datetime import datetime
 
 from flask import Flask, request, jsonify, send_from_directory
 
+from pagseguro import build_client_from_env
+
 from db.clip_store import (
     init_db,
     insert_clip,
@@ -30,6 +32,15 @@ def _to_int(value, default=0):
         return int(value)
     except Exception:
         return default
+
+
+# Simple CORS for cross-origin access from the static site (http://localhost:8000)
+@app.after_request
+def add_cors_headers(resp):
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, OPTIONS'
+    return resp
 
 
 @app.route("/health")
@@ -134,7 +145,49 @@ def create_clip():
 @app.route("/media/<path:filename>", methods=["GET"])
 def media(filename: str):
     # Serve saved clips from local folder
-    return send_from_directory(CLIPS_DIR, filename)
+    # Force browser to download as attachment for a smoother UX
+    return send_from_directory(CLIPS_DIR, filename, as_attachment=True, download_name="replay.mp4")
+
+
+# --- Payments (PagSeguro PIX) ---
+
+@app.route("/pay/pagseguro/start", methods=["POST"])
+def pay_pagseguro_start():
+    data = request.get_json(silent=True) or {}
+    video_id = data.get("video_id")
+    title = data.get("title") or "Replay"
+    price = data.get("price")
+    email = data.get("email")
+
+    if price is None:
+        return jsonify({"error": "missing price"}), 400
+    try:
+        price_float = float(price)
+    except Exception:
+        return jsonify({"error": "invalid price"}), 400
+
+    amount_cents = int(round(price_float * 100))
+    reference_id = f"replay_{video_id or 'unknown'}"
+
+    client = build_client_from_env()
+    # Optional: webhook URL (requires public URL and configuration)
+    notification_url = None
+    try:
+        res = client.create_pix_charge(reference_id=reference_id, description=title, amount_cents=amount_cents,
+                                       customer_email=email, notification_url=notification_url)
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({"error": "pagseguro_error", "detail": str(e)}), 502
+
+
+@app.route("/pay/pagseguro/status/<charge_id>", methods=["GET"])
+def pay_pagseguro_status(charge_id: str):
+    client = build_client_from_env()
+    try:
+        res = client.get_charge(charge_id)
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({"error": "pagseguro_error", "detail": str(e)}), 502
 
 
 if __name__ == "__main__":

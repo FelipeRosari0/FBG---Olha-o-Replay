@@ -2,13 +2,13 @@
 
 Site estático (HTML/CSS/JS puro) sem qualquer backend.
 
-- Abra `index.html` diretamente no navegador (file://).
+- Abra `inicio/index.html` diretamente no navegador (file://) ou via servidor local `http://localhost:8000/inicio/index.html`.
 - Não há servidor, rotas ou dependências (apenas Bootstrap 5 e Font Awesome via CDN).
 - Login, cadastro e compras são simulados e persistidos com `localStorage`.
 
 Estrutura:
 
-- `index.html`, `login.html`, `register.html`, `search.html`
+- `inicio/index.html`, `login/login.html`, `registrar/register.html`, `buscar-videos/search.html`, `historico/purchases.html`
 - `static/css/style.css`
 - `static/js/main.js`
 - `static/img/logo.svg`
@@ -124,7 +124,7 @@ git push -u origin main
    - Alternativamente, selecione `Branch: main` e `Folder: / (root)` se preferir.
    - A URL pública esperada para este projeto: `https://FelipeRosari0.github.io/FBG---Olha-o-Replay/`. [1]
 
-Este projeto é um site estático com `index.html` na raiz, compatível com GitHub Pages.
+Este projeto é um site estático com páginas organizadas em subpastas (ex.: `inicio/index.html`), compatível com GitHub Pages.
 
 ## Referências
 

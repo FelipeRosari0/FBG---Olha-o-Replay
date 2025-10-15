@@ -32,14 +32,15 @@ Passo a passo bem simples para iniciar o sistema no computador onde ficam os ví
 
 ## Como saber que está funcionando
 - No próprio computador:
-  - Abra `http://localhost:8000/search.html` (site abre).
+  - Abra `http://localhost:8000/inicio/index.html` (site abre).
+  - (Opcional) Ir direto para busca: `http://localhost:8000/buscar-videos/search.html`.
   - Abra `http://localhost:5000/health` (deve mostrar `{"status":"ok"}`).
 - Em outro celular/notebook na mesma rede (Wi‑Fi da quadra):
   - Descubra o IP do computador (Windows):
     - Abra o PowerShell e digite `ipconfig`.
     - Pegue o endereço IPv4 (ex.: `192.168.0.20`).
   - Acesse:
-    - Site: `http://SEU_IP:8000/search.html` (ex.: `http://192.168.0.20:8000/search.html`).
+    - Site: `http://SEU_IP:8000/inicio/index.html` (ex.: `http://192.168.0.20:8000/inicio/index.html`).
 
 ## Como chegam os vídeos
 - O sistema das câmeras/gravador salva os vídeos.
@@ -50,7 +51,7 @@ Passo a passo bem simples para iniciar o sistema no computador onde ficam os ví
 - Porta já em uso (erro ao iniciar):
   - Feche janelas antigas do site/backend e tente de novo.
 - Site não abre em outros aparelhos:
-  - Use `http://SEU_IP:8000/search.html` em vez de `localhost`.
+  - Use `http://SEU_IP:8000/inicio/index.html` em vez de `localhost`.
   - Permita o Python no Firewall do Windows quando aparecer o aviso.
   - Verifique se o computador e o celular estão na mesma rede.
 - Download não começa:

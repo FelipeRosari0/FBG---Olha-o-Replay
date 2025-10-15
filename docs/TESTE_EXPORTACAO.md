@@ -41,7 +41,7 @@ python -m http.server 8000
 curl -F "clip_file=@static/media/exemplo.mp4" -F "court_id=C1" -F "device_id=PC-QUADRA-01" -F "start_ms=300000" -F "duration_ms=30000" -F "event_type=gol" http://localhost:5000/clips
 ```
 
-5) Abra o site: `http://localhost:8000/search.html`.
+5) Abra o site: `http://localhost:8000/buscar-videos/search.html`.
 
 6) Compre o clip que apareceu na lista e clique em “Download”.
 
@@ -80,7 +80,7 @@ curl -F "clip_file=@static/media/exemplo.mp4" -F "court_id=C1" -F "device_id=PC-
    python -m http.server 8000
    ```
 
-4. Abra no navegador: `http://localhost:8000/search.html`.
+4. Abra no navegador: `http://localhost:8000/buscar-videos/search.html`.
 5. Localize o vídeo “Final 7x7 - Arena Centro”.
 6. Clique em “Comprar”.
    - Se não estiver logado, informe um email no modal. A compra será registrada em `localStorage` e o botão “Download” aparecerá.
@@ -104,7 +104,7 @@ Passos:
    python -m http.server 8000
    ```
 
-2. Abra `http://localhost:8000/search.html` e efetue a compra do vídeo “Final 7x7 - Arena Centro”.
+2. Abra `http://localhost:8000/buscar-videos/search.html` e efetue a compra do vídeo “Final 7x7 - Arena Centro”.
 3. Clique em “Download”.
 
 Observações:
@@ -175,6 +175,6 @@ Este projeto inclui um servidor Flask para ingestão e listagem de clips (30s). 
 ## Referências úteis
 
 - Frontend: `static/js/main.js` — lógica de compra, preview e download.
-- Páginas: `search.html`, `purchases.html`, `index.html`.
+- Páginas: `buscar-videos/search.html`, `historico/purchases.html`, `inicio/index.html`.
 - Backend (opcional): `server/app.py`, endpoints `/clips` e `/media/<filename>`.
 - README do projeto: detalhes sobre estrutura e APIs.

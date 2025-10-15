@@ -9,8 +9,9 @@ start "Site Olha o Replay" cmd /k "python -m http.server 8000"
 echo Iniciando Backend (porta 5000)...
 start "Backend Olha o Replay" cmd /k "python server\app.py"
 
-echo Pronto! Acesse o site em: http://localhost:8000/search.html
-echo Se outro aparelho for usar, acesse: http://SEU_IP:8000/search.html
+echo Pronto! Acesse o site em: http://localhost:8000/inicio/index.html
+echo (Direto Buscar Vídeos: http://localhost:8000/buscar-videos/search.html)
+echo Se outro aparelho for usar, acesse: http://SEU_IP:8000/inicio/index.html
 echo (Descubra o IP com o comando: ipconfig)
 
 pause

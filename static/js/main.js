@@ -469,6 +469,16 @@
     const buyModal = buyModalEl ? new bootstrap.Modal(buyModalEl) : null;
     let pendingBuyId = null;
 
+    // PIX modal elements
+    const pixModalEl = document.getElementById('pixModal');
+    const pixModal = pixModalEl ? new bootstrap.Modal(pixModalEl) : null;
+    const pixQrImageEl = document.getElementById('pixQrImage');
+    const pixCodeTextEl = document.getElementById('pixCodeText');
+    const pixStatusEl = document.getElementById('pixStatus');
+    const pixCopyBtn = document.getElementById('pixCopy');
+    let pixPollTimer = null;
+    let currentChargeId = null;
+
     // Populate courts
     state.courts.forEach(c => {
       const opt = document.createElement('option');
@@ -569,15 +579,12 @@
             if (!email) return;
             if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
             setAnonEmail(email);
-            addPurchase(email, video.id);
-            showAlert(alertContainer, 'Compra realizada! O download foi habilitado para este vídeo.', 'success');
-            apply();
-          }
+            startPagSeguroPix(video, email);
+            }
           return;
         }
-        addPurchase(user.email, video.id);
-        showAlert(alertContainer, 'Compra realizada! O download foi habilitado para este vídeo.', 'success');
-        apply();
+        // Usuário logado: iniciar PagSeguro também
+        startPagSeguroPix(video, user.email);
       }
 
       if (action === 'download') {
@@ -600,11 +607,202 @@
       if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
       if (!pendingBuyId) return;
       setAnonEmail(email);
-      addPurchase(email, pendingBuyId);
+      const video = [...state.videos, ...state.serverVideos].find(v => v.id === pendingBuyId);
       pendingBuyId = null;
       buyModal?.hide();
-      showAlert(alertContainer, 'Compra realizada! O download foi habilitado para este vídeo.', 'success');
-      apply();
+      startPagSeguroPix(video, email);
+    });
+
+    // Copy PIX code
+    pixCopyBtn?.addEventListener('click', async () => {
+      const text = pixCodeTextEl?.value || '';
+      if (!text) return;
+      try { await navigator.clipboard.writeText(text); } catch {}
+      pixStatusEl && (pixStatusEl.textContent = 'Código copiado. Aguarde a confirmação do pagamento...');
+    });
+
+    // Start payment via PagSeguro (PIX)
+    async function startPagSeguroPix(video, email) {
+      if (!video || !email) return;
+      try {
+        const res = await fetch(`${API_BASE}/pay/pagseguro/start`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ video_id: video.id, title: video.title, price: video.price, email })
+        });
+        if (!res.ok) throw new Error(`Erro ao iniciar pagamento: ${res.status}`);
+        const data = await res.json();
+        // Show PIX modal
+        if (pixCodeTextEl) pixCodeTextEl.value = data?.qr_code?.text || '';
+        if (pixQrImageEl && data?.qr_code?.image) {
+          pixQrImageEl.src = data.qr_code.image;
+          pixQrImageEl.style.display = 'block';
+        } else if (pixQrImageEl) {
+          pixQrImageEl.style.display = 'none';
+        }
+        if (pixStatusEl) pixStatusEl.textContent = 'Aguardando pagamento...';
+        pixModal?.show();
+
+        currentChargeId = data.charge_id;
+        // Poll status
+        clearInterval(pixPollTimer);
+        pixPollTimer = setInterval(async () => {
+          try {
+            const sres = await fetch(`${API_BASE}/pay/pagseguro/status/${currentChargeId}`);
+            if (!sres.ok) return;
+            const sdata = await sres.json();
+            const status = (sdata.status || '').toUpperCase();
+            if (pixStatusEl) pixStatusEl.textContent = `Status: ${status}`;
+            if (status === 'PAID' || status === 'PAID_OUT' || status === 'PAID_CONFIRMED') {
+              clearInterval(pixPollTimer);
+              // Mark purchase locally
+              const user = getCurrentUser();
+              const who = user?.email || getAnonEmail();
+              if (who) addPurchase(who, video.id);
+              showAlert(alertContainer, 'Pagamento confirmado! O download foi habilitado para este vídeo.', 'success');
+              apply();
+              // Auto-close modal after a moment
+              setTimeout(() => { pixModal?.hide(); }, 1200);
+            }
+          } catch {}
+        }, 4000);
+      } catch (err) {
+        console.error(err);
+        showAlert(alertContainer, 'Falha ao iniciar pagamento. Compra simulada foi concluída para teste.', 'warning');
+        const user = getCurrentUser();
+        const who = user?.email || getAnonEmail();
+        if (who && video?.id) {
+          addPurchase(who, video.id);
+          apply();
+        }
+      }
+    }
+  }
+
+  // Payment page (form-based PIX)
+  function initPayment() {
+    const form = document.getElementById('payForm');
+    if (!form) return;
+    const emailEl = document.getElementById('payEmail');
+    const descEl = document.getElementById('payDescription');
+    const valueEl = document.getElementById('payValue');
+    const videoIdEl = document.getElementById('payVideoId');
+    const alertContainer = document.getElementById('alertContainer');
+    const pixQrImageEl = document.getElementById('pixQrImagePay');
+    const pixCodeTextEl = document.getElementById('pixCodeTextPay');
+    const pixStatusEl = document.getElementById('pixStatusPay');
+    const pixCopyBtn = document.getElementById('pixCopyPay');
+    const pixCancelBtn = document.getElementById('pixCancelPay');
+    const pixQrPlaceholderEl = document.getElementById('pixQrPlaceholder');
+    const summaryTitleEl = document.getElementById('paySummaryTitle');
+    const summaryPriceEl = document.getElementById('paySummaryPrice');
+    const summaryCourtEl = document.getElementById('paySummaryCourt');
+    const summaryDateEl = document.getElementById('paySummaryDate');
+    let pollTimer = null;
+    let chargeId = null;
+
+    // Prefill from query string and current user
+    const params = new URLSearchParams(location.search);
+    const vid = params.get('video_id');
+    videoIdEl.value = vid || '';
+    const user = getCurrentUser();
+    const cachedEmail = getAnonEmail();
+    if (user?.email) emailEl.value = user.email; else if (cachedEmail) emailEl.value = cachedEmail;
+    if (vid) {
+      const v = [...state.videos, ...state.serverVideos].find(x => x.id === vid);
+      if (v) {
+        descEl.value = v.title;
+        valueEl.value = v.price.toFixed(2);
+        // Update summary fields
+        summaryTitleEl && (summaryTitleEl.textContent = v.title);
+        summaryPriceEl && (summaryPriceEl.textContent = `R$ ${v.price.toFixed(2)}`);
+        summaryCourtEl && (summaryCourtEl.textContent = v.court || 'Quadra');
+        summaryDateEl && (summaryDateEl.textContent = v.date || 'Data');
+      } else {
+        summaryTitleEl && (summaryTitleEl.textContent = `Replay #${vid}`);
+        summaryPriceEl && (summaryPriceEl.textContent = `R$ ${parseFloat(valueEl.value || '0').toFixed(2)}`);
+      }
+    } else {
+      // No video: reflect current form values
+      summaryTitleEl && (summaryTitleEl.textContent = descEl.value || 'Replay');
+      summaryPriceEl && (summaryPriceEl.textContent = `R$ ${(parseFloat(valueEl.value || '0')||0).toFixed(2)}`);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailEl.value.trim();
+      const desc = descEl.value.trim();
+      const value = parseFloat(valueEl.value);
+      if (!email || !desc || !value) { showAlert(alertContainer, 'Preencha todos os campos.', 'warning'); return; }
+      if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
+      setAnonEmail(email); // salva para compras futuras
+
+      // UI: start loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Gerando PIX...'; }
+      pixStatusEl && (pixStatusEl.textContent = 'Gerando PIX...');
+
+      try {
+        const res = await fetch(`${API_BASE}/pay/pagseguro/start`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ video_id: vid, title: desc, price: value, email })
+        });
+        if (!res.ok) throw new Error(`Erro ao iniciar pagamento: ${res.status}`);
+        const data = await res.json();
+        // Render QR/code
+        const qrText = data?.qr_code?.text || '';
+        const qrImage = data?.qr_code?.image || '';
+        if (pixCodeTextEl) pixCodeTextEl.value = qrText;
+        if (pixQrImageEl && qrImage) {
+          pixQrImageEl.src = qrImage;
+          pixQrImageEl.style.display = 'block';
+          pixQrPlaceholderEl && (pixQrPlaceholderEl.style.display = 'none');
+        } else if (pixQrImageEl) {
+          pixQrImageEl.style.display = 'none';
+          // Show placeholder if we at least have text
+          if (pixQrPlaceholderEl) pixQrPlaceholderEl.style.display = qrText ? 'none' : 'block';
+        }
+        if (pixStatusEl) pixStatusEl.textContent = 'Aguardando pagamento...';
+        chargeId = data.charge_id;
+
+        clearInterval(pollTimer);
+        pollTimer = setInterval(async () => {
+          try {
+            const sres = await fetch(`${API_BASE}/pay/pagseguro/status/${chargeId}`);
+            if (!sres.ok) return;
+            const sdata = await sres.json();
+            const status = (sdata.status || '').toUpperCase();
+            if (pixStatusEl) pixStatusEl.textContent = `Status: ${status}`;
+            if (status.startsWith('PAID')) {
+              clearInterval(pollTimer);
+              const who = user?.email || getAnonEmail();
+              const v = vid || null;
+              if (who && v) addPurchase(who, v);
+              showAlert(alertContainer, 'Pagamento confirmado! Seu download foi habilitado em "Compras".', 'success');
+            }
+          } catch {}
+        }, 4000);
+      } catch (err) {
+        console.error(err);
+        showAlert(alertContainer, 'Falha ao iniciar pagamento. Você pode tentar novamente.', 'danger');
+      }
+      // UI: end loading state
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-qrcode me-2"></i>Gerar PIX'; }
+    });
+
+    // Copy PIX code
+    pixCopyBtn?.addEventListener('click', async () => {
+      const text = pixCodeTextEl?.value || '';
+      if (!text) return;
+      try { await navigator.clipboard.writeText(text); } catch {}
+      pixStatusEl && (pixStatusEl.textContent = 'Código copiado. Aguarde a confirmação do pagamento...');
+    });
+
+    // Cancel polling
+    pixCancelBtn?.addEventListener('click', () => {
+      clearInterval(pollTimer);
+      pollTimer = null;
+      chargeId = null;
+      pixStatusEl && (pixStatusEl.textContent = 'Pagamento cancelado. Gere um novo PIX para tentar novamente.');
     });
   }
 
@@ -616,6 +814,7 @@
     initRegister();
     initSearch();
     initPurchases();
+    initPayment();
   }
 
   document.addEventListener('DOMContentLoaded', init);
