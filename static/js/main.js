@@ -27,7 +27,7 @@
         end: '19:00',
         duration: '60 min',
         price: 9.9,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: true,
         mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
       },
@@ -40,7 +40,7 @@
         end: '21:00',
         duration: '60 min',
         price: 7.5,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
       {
@@ -52,7 +52,7 @@
         end: '18:30',
         duration: '60 min',
         price: 5.0,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
       {
@@ -64,7 +64,7 @@
         end: '20:00',
         duration: '60 min',
         price: 8.5,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: true,
         mediaUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
       },
@@ -77,7 +77,7 @@
         end: '22:00',
         duration: '60 min',
         price: 4.9,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
       {
@@ -89,7 +89,7 @@
         end: '19:30',
         duration: '60 min',
         price: 6.9,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
       {
@@ -101,7 +101,7 @@
         end: '18:00',
         duration: '60 min',
         price: 9.0,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: true,
         mediaUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
       },
@@ -114,7 +114,7 @@
         end: '17:00',
         duration: '60 min',
         price: 5.0,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
       {
@@ -126,7 +126,7 @@
         end: '21:30',
         duration: '90 min',
         price: 12.0,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: true,
         mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
       },
@@ -139,7 +139,7 @@
         end: '23:00',
         duration: '60 min',
         price: 3.5,
-        thumb: 'static/img/thumb_futebol.svg',
+        thumb: '../static/img/thumb_futebol.svg',
         hasMedia: false,
       },
     ],
@@ -259,7 +259,7 @@
       if (userName) userName.textContent = user.username || user.email;
       logoutBtn?.addEventListener('click', () => {
         logout();
-        location.href = 'index.html';
+        location.href = '../inicio/index.html';
       });
     } else {
       navLogin?.classList.remove('d-none');
@@ -300,7 +300,7 @@
       if (!user) { showAlert(alertContainer, 'Credenciais inválidas.', 'danger'); return; }
       setCurrentUser(user);
       showAlert(alertContainer, 'Login realizado com sucesso! Redirecionando...', 'success');
-      setTimeout(() => location.href = 'index.html', 800);
+      setTimeout(() => location.href = '../inicio/index.html', 800);
     });
   }
 
@@ -330,7 +330,7 @@
       setLS(LS_KEYS.users, users);
       setCurrentUser(newUser);
       showAlert(alertContainer, 'Cadastro concluído! Redirecionando...', 'success');
-      setTimeout(() => location.href = 'index.html', 800);
+      setTimeout(() => location.href = '../inicio/index.html', 800);
     });
   }
 
@@ -429,7 +429,7 @@
         const modalBody = document.getElementById('previewContent');
         if (modalBody) {
           if (video.hasMedia) {
-            const src = video.mediaUrl || 'static/media/exemplo.mp4';
+            const src = video.mediaUrl || '../static/media/exemplo.mp4';
             modalBody.innerHTML = `<video controls style="width:100%" src="${src}" poster="${video.thumb}"></video>`;
           } else {
             modalBody.innerHTML = `<img src="${video.thumb}" alt="preview" style="width:100%; border-radius:.5rem">`;
@@ -442,7 +442,7 @@
       if (action === 'download') {
         if (!video.hasMedia) { showAlert(alertContainer, 'Arquivo placeholder não disponível no projeto (opcional).', 'info'); return; }
         const a = document.createElement('a');
-        a.href = video.mediaUrl || 'static/media/exemplo.mp4';
+        a.href = video.mediaUrl || '../static/media/replay.mp4';
         a.download = 'replay.mp4';
         document.body.appendChild(a);
         a.click();
@@ -549,7 +549,7 @@
       if (action === 'preview') {
         const modalBody = document.getElementById('previewContent');
         if (video.hasMedia) {
-          const src = video.mediaUrl || 'static/media/exemplo.mp4';
+          const src = video.mediaUrl || '../static/media/exemplo.mp4';
           modalBody.innerHTML = `<video controls style="width:100%" src="${src}" poster="${video.thumb}"></video>`;
         } else {
           modalBody.innerHTML = `<img src="${video.thumb}" alt="preview" style="width:100%; border-radius:.5rem">`;
@@ -585,7 +585,7 @@
         if (!canDownload) { showAlert(alertContainer, 'Você precisa comprar antes de baixar.', 'danger'); return; }
         if (!video.hasMedia) { showAlert(alertContainer, 'Arquivo placeholder não disponível no projeto (opcional).', 'info'); return; }
         const a = document.createElement('a');
-        a.href = video.mediaUrl || 'static/media/exemplo.mp4';
+        a.href = video.mediaUrl || '../static/media/exemplo.mp4';
         a.download = 'replay.mp4';
         document.body.appendChild(a);
         a.click();
