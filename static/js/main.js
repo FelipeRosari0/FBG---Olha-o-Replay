@@ -1,20 +1,21 @@
 // Olha o Replay - Client-side app (sem backend)
 (function () {
-  const API_BASE = 'http://localhost:5000';
+  const API_BASE = '';
   const LS_KEYS = {
     users: 'or_users',
     currentUser: 'or_currentUser',
     purchases: 'or_purchases',
     anonEmail: 'or_anon_email',
+    clips: 'or_clips',
   };
 
   const state = {
     courts: [
-      { id: 'c1', name: 'Arena Centro' },
-      { id: 'c2', name: 'Quadra Norte' },
-      { id: 'c3', name: 'Quadra Sul' },
-      { id: 'c4', name: 'Quadra Leste' },
-      { id: 'c5', name: 'Quadra Oeste' },
+      { id: 'c1', name: 'Canhoto Sports', logo: '../static/img/canchas/logo_canhoto.jpg' },
+      { id: 'c2', name: 'Bola de Ouro Arena', logo: '../static/img/canchas/logo_boladeouro.jpg' },
+      { id: 'c3', name: 'Arena MVP • Society & Beach', logo: '../static/img/canchas/logo_arena_mvp.jpg' },
+      { id: 'c4', name: 'Cancha Ivanoski', logo: '../static/img/canchas/logo_ivanoski.jpg' },
+      { id: 'c5', name: 'Paraíso da Bola', logo: '../static/img/canchas/logo_paraiso_da_bola.png' },
     ],
     serverVideos: [],
     videos: [
@@ -151,6 +152,15 @@
     d.setDate(d.getDate() + daysOffset);
     return d.toISOString().slice(0, 10);
   }
+  function formatDateLabel(dateStr) {
+    try {
+      if (!dateStr) return '';
+      const d = new Date(`${dateStr}T00:00:00`);
+      return d.toLocaleDateString('pt-BR');
+    } catch {
+      return dateStr;
+    }
+  }
   function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
@@ -163,13 +173,8 @@
     if (startB == null || endB == null) return true; // sem filtro
     return startA <= endB && endA >= startB;
   }
-  function getLS(key, fallback) {
-    try {
-      const v = localStorage.getItem(key);
-      return v ? JSON.parse(v) : fallback;
-    } catch { return fallback; }
-  }
-  function setLS(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+  function getLS(key, fallback) { return fallback; }
+  function setLS(key, value) { /* desativado: sem persistência */ }
 
   // Anonymous buyer helpers
   function getAnonEmail() {
@@ -190,7 +195,7 @@
     const dateStr = (clip.recorded_at || '').slice(0, 10);
     const durMs = Number(clip.duration_ms || 0);
     const durLabel = durMs ? `${Math.round(durMs/1000)} s` : '30 s';
-    const courtId = clip.court_id || '';
+    const courtId = (clip.court_id || '').toLowerCase();
     const mediaUrl = clip.clip_url || null;
     return {
       id: `srv_${clip.id}`,
@@ -208,6 +213,11 @@
   }
 
   async function loadServerClips(limit = 50) {
+    if (!API_BASE) {
+      const items = getLS(LS_KEYS.clips, []);
+      state.serverVideos = Array.isArray(items) ? items : [];
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/clips?limit=${limit}`);
       const json = await res.json();
@@ -226,53 +236,20 @@
   }
 
   // Auth helpers
-  function getCurrentUser() { return getLS(LS_KEYS.currentUser, null); }
-  function setCurrentUser(user) { setLS(LS_KEYS.currentUser, user); }
-  function logout() { localStorage.removeItem(LS_KEYS.currentUser); }
+  function getCurrentUser() { return null; }
+  function setCurrentUser(user) { /* desativado */ }
+  function logout() { /* desativado */ }
 
   function ensureSeed() {
-    // Seed users if empty
-    const users = getLS(LS_KEYS.users, null);
-    if (!users) {
-      setLS(LS_KEYS.users, [
-        { username: 'Ana', email: 'ana@exemplo.com', password: '123456' },
-      ]);
-    }
-    // Seed purchases
-    const purchases = getLS(LS_KEYS.purchases, null);
-    if (!purchases) setLS(LS_KEYS.purchases, {});
+    /* desativado: sem seed de usuários ou compras */
   }
 
   function updateNavbar() {
-    const user = getCurrentUser();
     const navLogin = document.getElementById('navLogin');
     const navRegister = document.getElementById('navRegister');
     const navUser = document.getElementById('navUser');
-    const userName = document.getElementById('userName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (!navUser) return; // not loaded
-
-    if (user) {
-      navLogin?.classList.add('d-none');
-      navRegister?.classList.add('d-none');
-      navUser?.classList.remove('d-none');
-      if (userName) userName.textContent = user.username || user.email;
-      logoutBtn?.addEventListener('click', () => {
-        logout();
-        location.href = '../inicio/index.html';
-      });
-    } else {
-      navLogin?.classList.remove('d-none');
-      navRegister?.classList.remove('d-none');
-      navUser?.classList.add('d-none');
-    }
-
-    // Index hero CTA
-    const heroCta = document.getElementById('heroCtaRegister');
-    if (heroCta) {
-      if (user) heroCta.classList.add('d-none');
-      else heroCta.classList.remove('d-none');
-    }
+    navUser?.classList.add('d-none');
+    // Caso existam links de login/cadastro, mantê-los como estáticos
   }
 
   // Login page
@@ -404,15 +381,13 @@
               <span class="text-muted">${v.date} • ${v.duration}</span>
             </p>
             <div class="mt-auto d-flex justify-content-between align-items-center">
-              <span class="price-tag">R$ ${v.price.toFixed(2)}</span>
               <div class="btn-group">
                 <button class="btn btn-brand-dark btn-sm" data-action="preview" data-id="${v.id}"><i class="fa-regular fa-circle-play me-1"></i>Preview</button>
-                <button class="btn btn-brand-green btn-sm" data-action="download" data-id="${v.id}"><i class="fa-solid fa-download me-1"></i>Download</button>
+                <button class="btn btn-brand-green btn-sm" data-action="download" data-id="${v.id}" ${v.hasMedia ? '' : 'disabled'}><i class="fa-solid fa-download me-1"></i>Download</button>
               </div>
             </div>
           </div>
-        </div>
-      `;
+        `;
       listEl.appendChild(col);
     });
 
@@ -442,7 +417,7 @@
       if (action === 'download') {
         if (!video.hasMedia) { showAlert(alertContainer, 'Arquivo placeholder não disponível no projeto (opcional).', 'info'); return; }
         const a = document.createElement('a');
-        a.href = video.mediaUrl || '../static/media/replay.mp4';
+        a.href = video.mediaUrl || '../static/media/exemplo.mp4';
         a.download = 'replay.mp4';
         document.body.appendChild(a);
         a.click();
@@ -453,6 +428,10 @@
 
   // Search page
   function initSearch() {
+    // Oculta vídeos locais de demonstração salvo se ?demo=1
+    const params = new URLSearchParams(location.search);
+    const showDemo = params.get('demo') === '1';
+    if (!showDemo) { state.videos = []; }
     const form = document.getElementById('searchForm');
     if (!form) return;
     const courtSel = document.getElementById('filterCourt');
@@ -494,7 +473,6 @@
       videos.forEach(v => {
         const col = document.createElement('div');
         col.className = 'col-md-4 mb-4';
-        const purchased = isPurchasedByAny(v.id);
         col.innerHTML = `
           <div class="card h-100 shadow-sm">
             <img src="${v.thumb}" alt="thumb" class="video-thumb">
@@ -502,7 +480,7 @@
               <h5 class="card-title">${v.title}</h5>
               <p class="card-text mb-2">
                 <span class="badge bg-primary me-2">${findCourt(v.courtId)?.name || v.courtId || ''}</span>
-                <span class="text-muted">${v.date} • ${v.duration}</span>
+                <span class="text-muted">${formatDateLabel(v.date)} • ${v.duration}</span>
               </p>
               <div class="mt-auto d-flex justify-content-between align-items-center">
                 <span class="price-tag">R$ ${v.price.toFixed(2)}</span>
@@ -624,6 +602,22 @@
     // Start payment via PagSeguro (PIX)
     async function startPagSeguroPix(video, email) {
       if (!video || !email) return;
+      // Modo offline: simula criação de cobrança e confirmação
+      if (!API_BASE) {
+        if (pixCodeTextEl) pixCodeTextEl.value = `PIX:${video.id}:${email}:${Date.now()}`;
+        if (pixQrImageEl) { pixQrImageEl.style.display = 'none'; }
+        if (pixStatusEl) pixStatusEl.textContent = 'Aguardando pagamento...';
+        pixModal?.show();
+        setTimeout(() => {
+          const user = getCurrentUser();
+          const who = user?.email || getAnonEmail();
+          if (who) addPurchase(who, video.id);
+          showAlert(alertContainer, 'Pagamento confirmado (offline). Download habilitado.', 'success');
+          apply();
+          setTimeout(() => { pixModal?.hide(); }, 800);
+        }, 1500);
+        return;
+      }
       try {
         const res = await fetch(`${API_BASE}/pay/pagseguro/start`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -734,13 +728,32 @@
       const value = parseFloat(valueEl.value);
       if (!email || !desc || !value) { showAlert(alertContainer, 'Preencha todos os campos.', 'warning'); return; }
       if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
-      setAnonEmail(email); // salva para compras futuras
-
+      setAnonEmail(email);
       // UI: start loading state
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Gerando PIX...'; }
       pixStatusEl && (pixStatusEl.textContent = 'Gerando PIX...');
-
+  
+      // Offline simulation
+      if (!API_BASE) {
+        const qrText = `PIX:${vid || 'manual'}:${email}:${Date.now()}`;
+        if (pixCodeTextEl) pixCodeTextEl.value = qrText;
+        if (pixQrImageEl) { pixQrImageEl.style.display = 'none'; }
+        if (pixQrPlaceholderEl) pixQrPlaceholderEl.style.display = qrText ? 'block' : 'none';
+        if (pixStatusEl) pixStatusEl.textContent = 'Aguardando pagamento...';
+        setTimeout(() => {
+          // Marca compra localmente quando houver video id
+          if (vid) {
+            addPurchase(email, vid);
+            showAlert(alertContainer, 'Pagamento confirmado (offline). O download foi habilitado.', 'success');
+          } else {
+            showAlert(alertContainer, 'PIX gerado (offline). Compra manual sem vínculo a vídeo.', 'info');
+          }
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Gerar PIX'; }
+        }, 1200);
+        return;
+      }
+  
       try {
         const res = await fetch(`${API_BASE}/pay/pagseguro/start`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -810,12 +823,30 @@
   function init() {
     ensureSeed();
     updateNavbar();
-    initLogin();
-    initRegister();
+    // initLogin();
+    // initRegister();
     initSearch();
-    initPurchases();
-    initPayment();
+    // initPurchases();
+    // initPayment();
   }
 
   document.addEventListener('DOMContentLoaded', init);
 })();
+
+// Fallback inteligente para logos na home (tenta outras extensões)
+window.logoFallback = function (img) {
+  try {
+    const base = img.getAttribute('data-logo-base');
+    const exts = (img.getAttribute('data-exts') || 'png,jpg,jpeg,webp').split(',');
+    const attempt = parseInt(img.getAttribute('data-attempt') || '0', 10);
+    if (!base) { img.src = '../static/img/logo.svg'; return; }
+    if (attempt < exts.length) {
+      img.setAttribute('data-attempt', String(attempt + 1));
+      img.src = `../static/img/canchas/${base}.${exts[attempt]}`;
+    } else {
+      img.src = '../static/img/logo.svg';
+    }
+  } catch (e) {
+    img.src = '../static/img/logo.svg';
+  }
+};

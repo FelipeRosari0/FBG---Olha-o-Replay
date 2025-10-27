@@ -21,19 +21,7 @@
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0" id="navLinks">
-            <li class="nav-item"><a class="nav-link active" href="../buscar-videos/search.html">Vídeos</a></li>
-            <li class="nav-item" id="navLogin"><a class="nav-link" href="../login/login.html">Login</a></li>
-            <li class="nav-item" id="navRegister"><a class="nav-link" href="../registrar/register.html">Cadastrar</a></li>
-            <li class="nav-item dropdown d-none" id="navUser">
-              <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-user"></i> <span id="userName">Usuário</span>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                <li><a class="dropdown-item" href="../historico/purchases.html">Compras</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item" id="logoutBtn">Sair</button></li>
-              </ul>
-            </li>
+            <li class="nav-item"><a class="nav-link" href="../buscar-videos/search.html">Vídeos</a></li>
           </ul>
         </div>
       </div>
@@ -54,7 +42,7 @@
         </div>
         <div class="col-md-4">
           <label class="form-label" for="filterDate">Data</label>
-          <input type="date" id="filterDate" class="form-control">
+          <input type="date" id="filterDate" class="form-control" lang="pt-BR" placeholder="dd/mm/aaaa">
         </div>
         <div class="col-md-4">
           <label class="form-label">Horário</label>
@@ -151,7 +139,6 @@
         <div class="mt-3 mt-md-0">
           <a href="../inicio/index.html" class="text-white me-3">Início</a>
           <a href="../buscar-videos/search.html" class="text-white me-3">Buscar Vídeos</a>
-          <a href="../historico/purchases.html" class="text-white me-3">Compras</a>
           <a href="#" class="text-white">Contato</a>
         </div>
       </div>
