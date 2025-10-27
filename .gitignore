@@ -19,3 +19,15 @@ server/data/
 
 # Logs
 *.log
+
+# Python venv
+.venv/
+
+# Vídeos locais e temporários (não versionar)
+videos/
+videos_test/
+videos_temp/
+videos_temp_test/
+
+# Arquivos de vídeo temporários
+*.avi
