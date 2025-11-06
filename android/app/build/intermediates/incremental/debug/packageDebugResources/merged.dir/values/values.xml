@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="purple_500">#6D28D9</color>
+    <color name="purple_700">#4C1D95</color>
+    <color name="white">#FFFFFF</color>
+    <string name="app_name">Olha o Replay</string>
+    <string name="initial_url">file:///android_asset/inicio/index.html</string>
+    <style name="Theme.OlhaoReplay" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryDark">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Olha o Replay</string>
+    <!-- Carrega o site do app a partir dos assets locais -->
+    <string name="initial_url">file:///android_asset/inicio/index.html</string>
+</resources>

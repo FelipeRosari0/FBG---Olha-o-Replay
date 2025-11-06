@@ -15,7 +15,8 @@
       { id: 'c2', name: 'Bola de Ouro Arena', logo: '../static/img/canchas/logo_boladeouro.jpg' },
       { id: 'c3', name: 'Arena MVP • Society & Beach', logo: '../static/img/canchas/logo_arena_mvp.jpg' },
       { id: 'c4', name: 'Cancha Ivanoski', logo: '../static/img/canchas/logo_ivanoski.jpg' },
-      { id: 'c5', name: 'Paraíso da Bola', logo: '../static/img/canchas/logo_paraiso_da_bola.png' },
+      { id: 'c5', name: 'Paraíso da Bola', logo: '../static/img/canchas/logo_paraiso_da_bola.jpg' },
+      { id: 'c6', name: 'Complexo Esportivo Continental', logo: '../static/img/canchas/complexo esportivo continental.jpg' },
     ],
     serverVideos: [],
     videos: [
@@ -486,11 +487,7 @@
                 <span class="price-tag">R$ ${v.price.toFixed(2)}</span>
                 <div class="btn-group">
                   <button class="btn btn-brand-dark btn-sm" data-action="preview" data-id="${v.id}"><i class="fa-regular fa-circle-play me-1"></i>Preview</button>
-                  ${purchased ? `
-                    <button class="btn btn-brand-green btn-sm" data-action="download" data-id="${v.id}"><i class="fa-solid fa-download me-1"></i>Download</button>
-                  ` : `
-                    <button class="btn btn-brand-yellow btn-sm" data-action="buy" data-id="${v.id}"><i class="fa-solid fa-cart-shopping me-1"></i>Comprar</button>
-                  `}
+                  <button class="btn btn-brand-green btn-sm" data-action="download" data-id="${v.id}" ${v.hasMedia ? '' : 'disabled'}><i class="fa-solid fa-download me-1"></i>Download</button>
                 </div>
               </div>
             </div>

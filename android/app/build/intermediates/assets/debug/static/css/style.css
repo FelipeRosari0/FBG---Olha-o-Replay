@@ -1,0 +1,205 @@
+:root {
+  /* Paleta baseada na logo enviada */
+  --brand-green: #2e7d32;
+  --brand-yellow: #f5b531;
+  --brand-red: #e84d3c;
+  --brand-beige: #f8ead3;
+  --brand-dark: #121212;
+}
+
+/* Bootstrap primary = verde da marca */
+.bg-primary { background-color: var(--brand-green) !important; }
+.text-primary { color: var(--brand-green) !important; }
+
+/* Hero com fundo bege suave */
+.hero-gradient {
+  background: radial-gradient(1200px 600px at 50% -100px, var(--brand-beige), #fff 70%);
+  color: var(--brand-dark);
+}
+.pt-7 { padding-top: 7rem; }
+
+/* Botões CTA em amarelo da marca com contorno escuro */
+.btn-cta {
+  background: var(--brand-yellow);
+  color: #111;
+  border: 2px solid #111;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+.btn-cta:hover { filter: brightness(1.05); }
+
+/* Botões principais em verde da marca */
+.btn-primary { background-color: var(--brand-green); border-color: var(--brand-green); }
+.btn-primary:hover { background-color: #256528; border-color: #256528; }
+/* Variantes de botões com estética da logo */
+.btn-brand-yellow { background: #ffd278; color:#111; border:2px solid #111; border-radius: 999px; box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+.btn-brand-yellow:hover { filter: brightness(1.05); }
+.btn-brand-green { background: var(--brand-green); color:#fff; border:2px solid #111; border-radius: 999px; box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+.btn-brand-green:hover { filter: brightness(1.05); }
+.btn-brand-dark { background:#111; color:#fff; border:2px solid #111; border-radius: 999px; box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+.btn-brand-dark:hover { filter: brightness(1.1); }
+
+/* Cards com sombra suave e leve contorno escuro */
+.card, .p-3.shadow-sm {
+  box-shadow: 0 6px 20px rgba(0,0,0,.07);
+  border: 2px solid rgba(17,17,17,.6);
+  border-radius: .85rem;
+}
+
+/* Navbar */
+.navbar-brand img { filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+
+/* Header com todas as cores da marca */
+.brand-header { 
+  background-color: var(--brand-beige);
+  position: relative;
+  border-bottom: 2px solid rgba(17,17,17,.5);
+  z-index: 10;
+}
+.brand-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 6px;
+  background: linear-gradient(90deg, var(--brand-green), var(--brand-yellow), var(--brand-red));
+}
+.brand-header .navbar-brand, .brand-header .nav-link { color: var(--brand-dark) !important; }
+.brand-header .nav-link:hover { color: var(--brand-yellow) !important; }
+.brand-header .nav-link.active { color: var(--brand-red) !important; font-weight: 700; }
+.brand-header .navbar-toggler { border-color: rgba(17,17,17,.25); }
+.brand-header .navbar-toggler-icon { filter: none; }
+
+/* Badges e preços */
+.badge.bg-primary { background-color: var(--brand-green) !important; }
+.price-tag { color: var(--brand-dark); font-weight: 700; }
+
+/* Título de marca com contorno preto e corpo amarelo */
+.brand-title {
+  color: var(--brand-yellow);
+  letter-spacing: .5px;
+  -webkit-text-stroke: 1px #111;
+  text-shadow: 0 2px 0 rgba(0,0,0,.06);
+}
+
+/* Links da navbar com hover em amarelo */
+.navbar-dark .navbar-nav .nav-link:hover { color: var(--brand-yellow) !important; }
+
+/* Video card */
+.video-thumb {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-top-left-radius: .75rem;
+  border-top-right-radius: .75rem;
+  background: var(--brand-beige);
+}
+
+/* Hero refinements */
+.hero-logo {
+  height: 120px;
+  border: 1px solid rgba(17,17,17,.6);
+  border-radius: .75rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.hero-subtitle {
+  color: var(--brand-dark);
+  opacity: .85;
+}
+
+/* Botão branco com contorno preto */
+.btn-brand-light {
+  background: #fff;
+  color: #111;
+  border: 2px solid #111;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.10);
+}
+.btn-brand-light:hover { filter: brightness(1.03); }
+
+/* Footer */
+footer a { text-decoration: none; }
+footer { border-top: 4px solid var(--brand-green); }
+
+/* Alerts spacing */
+#alertContainer .alert { margin-bottom: 1rem; }
+
+/* Forms */
+form .input-group .btn { min-width: 46px; }
+
+/* Acentos em vermelho (ex: ícone play) */
+.accent-red { color: var(--brand-red); }
+
+/* CTA suave em bege, com texto escuro e contorno sutil */
+.cta-soft {
+  background: linear-gradient(180deg, #fff 0%, var(--brand-beige) 100%);
+  color: var(--brand-dark);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,.04);
+}
+.cta-soft h3 { color: var(--brand-dark); }
+
+/* Pagamento (PIX) */
+.qr-frame {
+  width: 280px;
+  height: 280px;
+  border: 2px solid rgba(17,17,17,.4);
+  border-radius: .75rem;
+  background: repeating-conic-gradient(#f7f7f7 0% 25%, #fff 0% 50%);
+  background-size: 30px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.qr-frame img { max-width: 100%; max-height: 100%; display: block; }
+.form-help { color: #6c757d; }
+.partner-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+.partner-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  position: relative;
+}
+
+/* Rótulo sobre a imagem nos cards de Parceiros */
+.partner-label {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(17,17,17,.7);
+  color: #fff;
+  font-size: .85rem;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: .5rem;
+  border: 1px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(2px);
+  z-index: 2;
+  pointer-events: none; /* mantém o link clicável */
+}
+.partner-name {
+  margin-top: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--brand-dark);
+}
+.court-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #198754;
+}
+/* Responsividade: Parceiros */
+@media (max-width: 576px) {
+  .partner-logo { width: 72px; height: 72px; }
+  .partner-card { min-height: 120px; }
+  .partner-name { font-size: .85rem; margin-top: 6px; }
+}

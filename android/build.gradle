@@ -1,0 +1,7 @@
+// Top-level build file (empty, using pluginManagement in settings.gradle)
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

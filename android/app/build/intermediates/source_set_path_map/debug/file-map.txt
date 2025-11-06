@@ -1,0 +1,38 @@
+com.olhareplay.app-pngs-0 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\build\generated\res\pngs\debug
+com.olhareplay.app-resValues-1 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\build\generated\res\resValues\debug
+com.olhareplay.app-packageDebugResources-2 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.olhareplay.app-packageDebugResources-3 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.olhareplay.app-merged_res-4 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\build\intermediates\merged_res\debug
+com.olhareplay.app-debug-5 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\src\debug\res
+com.olhareplay.app-main-6 C:\Git - Projetos\FBG---Olha-o-Replay\android\app\src\main\res
+com.olhareplay.app-jetified-activity-ktx-1.8.1-7 C:\Users\Felipe\.gradle\caches\transforms-3\0bb8003e2dac47511f1295f2488af045\transformed\jetified-activity-ktx-1.8.1\res
+com.olhareplay.app-coordinatorlayout-1.1.0-8 C:\Users\Felipe\.gradle\caches\transforms-3\0cc0c6f330256b9777bc66573f2e962e\transformed\coordinatorlayout-1.1.0\res
+com.olhareplay.app-jetified-lifecycle-viewmodel-ktx-2.6.1-9 C:\Users\Felipe\.gradle\caches\transforms-3\12ee90b30d1785c27ef5541aba0b33d5\transformed\jetified-lifecycle-viewmodel-ktx-2.6.1\res
+com.olhareplay.app-drawerlayout-1.1.1-10 C:\Users\Felipe\.gradle\caches\transforms-3\14ed39c50365dfb686f92c915abb5700\transformed\drawerlayout-1.1.1\res
+com.olhareplay.app-lifecycle-runtime-2.6.1-11 C:\Users\Felipe\.gradle\caches\transforms-3\32c53ec517418e8baf8e6ee8c7054dc8\transformed\lifecycle-runtime-2.6.1\res
+com.olhareplay.app-cardview-1.0.0-12 C:\Users\Felipe\.gradle\caches\transforms-3\35692894a2a578ab6fe6bd6ff24cd28c\transformed\cardview-1.0.0\res
+com.olhareplay.app-constraintlayout-2.1.4-13 C:\Users\Felipe\.gradle\caches\transforms-3\4e324064f305deba589dcac642af37bd\transformed\constraintlayout-2.1.4\res
+com.olhareplay.app-appcompat-1.6.1-14 C:\Users\Felipe\.gradle\caches\transforms-3\55ee004979b957d7f059b382d2274a7e\transformed\appcompat-1.6.1\res
+com.olhareplay.app-lifecycle-viewmodel-2.6.1-15 C:\Users\Felipe\.gradle\caches\transforms-3\5b11264801d4045bab352bc2c841fb43\transformed\lifecycle-viewmodel-2.6.1\res
+com.olhareplay.app-jetified-lifecycle-viewmodel-savedstate-2.6.1-16 C:\Users\Felipe\.gradle\caches\transforms-3\5b206124b05f960b2851d4cb92dc5318\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.1\res
+com.olhareplay.app-jetified-savedstate-1.2.1-17 C:\Users\Felipe\.gradle\caches\transforms-3\5cb5782e00726d034215bd55b5dd9900\transformed\jetified-savedstate-1.2.1\res
+com.olhareplay.app-jetified-emoji2-views-helper-1.2.0-18 C:\Users\Felipe\.gradle\caches\transforms-3\6af516ac88477858b303fb840b279125\transformed\jetified-emoji2-views-helper-1.2.0\res
+com.olhareplay.app-core-runtime-2.2.0-19 C:\Users\Felipe\.gradle\caches\transforms-3\72628ea3185823bf92aad8f54874f54e\transformed\core-runtime-2.2.0\res
+com.olhareplay.app-jetified-viewpager2-1.0.0-20 C:\Users\Felipe\.gradle\caches\transforms-3\7b45860acf9577019d848812685042bb\transformed\jetified-viewpager2-1.0.0\res
+com.olhareplay.app-jetified-lifecycle-runtime-ktx-2.6.1-21 C:\Users\Felipe\.gradle\caches\transforms-3\87ea9faab7b44c2f5fea23b28d96a294\transformed\jetified-lifecycle-runtime-ktx-2.6.1\res
+com.olhareplay.app-lifecycle-livedata-2.6.1-22 C:\Users\Felipe\.gradle\caches\transforms-3\8a480d4b6d17166c6ab1d283b9ee48ee\transformed\lifecycle-livedata-2.6.1\res
+com.olhareplay.app-transition-1.2.0-23 C:\Users\Felipe\.gradle\caches\transforms-3\8e2228486e275e16d693d7e8b3ea5056\transformed\transition-1.2.0\res
+com.olhareplay.app-core-1.12.0-24 C:\Users\Felipe\.gradle\caches\transforms-3\93d82fff6dc0bf72a8829dea1f1e0300\transformed\core-1.12.0\res
+com.olhareplay.app-jetified-lifecycle-process-2.6.1-25 C:\Users\Felipe\.gradle\caches\transforms-3\ab35c91d2ce882be6230f5aebe91fc37\transformed\jetified-lifecycle-process-2.6.1\res
+com.olhareplay.app-jetified-startup-runtime-1.1.1-26 C:\Users\Felipe\.gradle\caches\transforms-3\b0710d36a233a2066f7d94d5621ebafc\transformed\jetified-startup-runtime-1.1.1\res
+com.olhareplay.app-jetified-profileinstaller-1.3.0-27 C:\Users\Felipe\.gradle\caches\transforms-3\b5c550c7d1a061fa7438a71a3512fcc8\transformed\jetified-profileinstaller-1.3.0\res
+com.olhareplay.app-fragment-1.3.6-28 C:\Users\Felipe\.gradle\caches\transforms-3\b94baf7c81ad2e571ae1f1f1d54cb0ab\transformed\fragment-1.3.6\res
+com.olhareplay.app-jetified-emoji2-1.2.0-29 C:\Users\Felipe\.gradle\caches\transforms-3\ba3a7074d49ca99a29f2822ee5a60bb1\transformed\jetified-emoji2-1.2.0\res
+com.olhareplay.app-jetified-savedstate-ktx-1.2.1-30 C:\Users\Felipe\.gradle\caches\transforms-3\c4a13dbd6574abf7355891b57c74641b\transformed\jetified-savedstate-ktx-1.2.1\res
+com.olhareplay.app-jetified-appcompat-resources-1.6.1-31 C:\Users\Felipe\.gradle\caches\transforms-3\cc2980a2da9450060e9551bc4f47f4cf\transformed\jetified-appcompat-resources-1.6.1\res
+com.olhareplay.app-recyclerview-1.1.0-32 C:\Users\Felipe\.gradle\caches\transforms-3\d005dfc7988dea8c8246684dccb734db\transformed\recyclerview-1.1.0\res
+com.olhareplay.app-jetified-core-ktx-1.12.0-33 C:\Users\Felipe\.gradle\caches\transforms-3\d513b9410198ac8297bbc800344b4ca6\transformed\jetified-core-ktx-1.12.0\res
+com.olhareplay.app-jetified-annotation-experimental-1.3.0-34 C:\Users\Felipe\.gradle\caches\transforms-3\d5407d29b57b4efbf9cd4fddbe4661d7\transformed\jetified-annotation-experimental-1.3.0\res
+com.olhareplay.app-material-1.9.0-35 C:\Users\Felipe\.gradle\caches\transforms-3\dabc9af4f27d7c5b29d62c423dc29b72\transformed\material-1.9.0\res
+com.olhareplay.app-jetified-activity-1.8.1-36 C:\Users\Felipe\.gradle\caches\transforms-3\f5be97024836685ad2260ad94cc49999\transformed\jetified-activity-1.8.1\res
+com.olhareplay.app-lifecycle-livedata-core-2.6.1-37 C:\Users\Felipe\.gradle\caches\transforms-3\f675c3331716992f70002e98aa601e9b\transformed\lifecycle-livedata-core-2.6.1\res
