@@ -29,7 +29,7 @@
         end: '19:00',
         duration: '60 min',
         price: 9.9,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: true,
         mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
       },
@@ -42,7 +42,7 @@
         end: '21:00',
         duration: '60 min',
         price: 7.5,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: false,
       },
       {
@@ -54,7 +54,7 @@
         end: '18:30',
         duration: '60 min',
         price: 5.0,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: false,
       },
       {
@@ -66,7 +66,7 @@
         end: '20:00',
         duration: '60 min',
         price: 8.5,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: true,
         mediaUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
       },
@@ -79,7 +79,7 @@
         end: '22:00',
         duration: '60 min',
         price: 4.9,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: false,
       },
       {
@@ -91,7 +91,7 @@
         end: '19:30',
         duration: '60 min',
         price: 6.9,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: false,
       },
       {
@@ -103,7 +103,7 @@
         end: '18:00',
         duration: '60 min',
         price: 9.0,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: true,
         mediaUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
       },
@@ -116,7 +116,7 @@
         end: '17:00',
         duration: '60 min',
         price: 5.0,
-        thumb: '../static/img/thumb_futebol.svg',
+        thumb: '../static/img/OLHA O REPLAY.jpg',
         hasMedia: false,
       },
       {
@@ -207,7 +207,7 @@
       end: null,
       duration: durLabel,
       price: 5.0,
-      thumb: 'static/img/thumb_futebol.svg',
+      thumb: '../static/img/OLHA O REPLAY.jpg',
       hasMedia: !!mediaUrl,
       mediaUrl: mediaUrl,
     };
@@ -836,14 +836,14 @@ window.logoFallback = function (img) {
     const base = img.getAttribute('data-logo-base');
     const exts = (img.getAttribute('data-exts') || 'png,jpg,jpeg,webp').split(',');
     const attempt = parseInt(img.getAttribute('data-attempt') || '0', 10);
-    if (!base) { img.src = '../static/img/logo.svg'; return; }
+    if (!base) { img.src = '../static/img/OLHA O REPLAY.jpg'; return; }
     if (attempt < exts.length) {
       img.setAttribute('data-attempt', String(attempt + 1));
       img.src = `../static/img/canchas/${base}.${exts[attempt]}`;
     } else {
-      img.src = '../static/img/logo.svg';
+      img.src = '../static/img/OLHA O REPLAY.jpg';
     }
   } catch (e) {
-    img.src = '../static/img/logo.svg';
+    img.src = '../static/img/OLHA O REPLAY.jpg';
   }
 };
