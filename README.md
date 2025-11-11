@@ -9,10 +9,13 @@ Site estático (HTML/CSS/JS puro) sem backend.
 ## Estrutura
 
 - `inicio/index.html`, `buscar-videos/search.html`
+- `index.html` (redireciona para `inicio/index.html`)
+- `buscar-videos/index.html` (redireciona para `search.html`)
 - (opcionais) `login/login.html`, `registrar/register.html` — páginas desativadas e sem fluxo de autenticação
 - `static/css/style.css`
 - `static/js/main.js`
-- `static/img/logo.svg`
+- `static/img/OLHA O REPLAY.jpg` (favicon e logo)
+- `404.html`, `robots.txt`, `sitemap.xml`
 - `static/media/exemplo.mp4` (opcional; não incluído neste pacote)
 
 ## Observações
@@ -52,3 +55,24 @@ Este repositório inclui um projeto Android nativo em `android/` que carrega o s
 ### Dicas
 
 - Para suporte offline, você pode copiar todo o conteúdo do site para `android/app/src/main/assets/` e alterar a URL inicial para `file:///android_asset/index.html`. Lembre-se de levar também as imagens, CSS e JS mantendo a mesma estrutura de pastas.
+
+## Publicação
+
+### GitHub Pages
+- No repositório, acesse Settings → Pages.
+- Selecione Branch `main` e a pasta `/(root)`.
+- URL prevista: `https://FelipeRosari0.github.io/FBG---Olha-o-Replay/`.
+- Já incluímos:
+  - `index.html` com redirecionamento relativo para `inicio/index.html` (compatível com subcaminho).
+  - `buscar-videos/index.html` que aponta para `search.html` dentro do diretório.
+  - `404.html` (fallback amigável), `robots.txt` e `sitemap.xml`.
+  - Favicon/ícone em JPG (`static/img/OLHA O REPLAY.jpg`).
+
+### Netlify
+- Faça deploy da pasta raiz (drag-and-drop ou CLI `ntl deploy`).
+- Não há build — é site estático.
+- O `404.html` cobre rotas inválidas; favicons e redirects já estão configurados.
+
+### Observações de caminho/base
+- Os caminhos de imagens e scripts foram escritos de forma relativa para funcionar em subdiretórios (ex.: `inicio/`, `buscar-videos/`).
+- Em `static/js/main.js`, as miniaturas usam `../static/img/OLHA O REPLAY.jpg` para funcionar nas páginas dentro de subpastas.
