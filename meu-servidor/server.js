@@ -33,7 +33,29 @@ app.get("/api/videos", (req, res) => {
   try { rootFiles = filterVideos(fs.readdirSync(VIDEO_DIR_ROOT)); } catch {}
   try { localFiles = filterVideos(fs.readdirSync(VIDEO_DIR_LOCAL)); } catch {}
   const all = Array.from(new Set([ ...rootFiles, ...localFiles ]));
-  res.json(all);
+  
+  // Retornar array de objetos com nome e data de criação (birthtime)
+  const videos = all.map(fileName => {
+    let videoPath = path.join(VIDEO_DIR_ROOT, fileName);
+    if (!fs.existsSync(videoPath)) {
+      videoPath = path.join(VIDEO_DIR_LOCAL, fileName);
+    }
+    
+    let birthtime = null;
+    try {
+      const stat = fs.statSync(videoPath);
+      birthtime = stat.birthtime; // Data de criação do arquivo
+    } catch (e) {
+      birthtime = new Date(); // Fallback
+    }
+    
+    return {
+      name: fileName,
+      birthtime: birthtime
+    };
+  });
+  
+  res.json(videos);
 });
 
 app.get("/videos/:video", (req, res) => {

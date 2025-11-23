@@ -14,7 +14,7 @@
       .hidden { display: none !important; }
       .popup { position: fixed; left: 0; right: 0; top: 0; bottom: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); z-index:2000; }
 
-  .popup-content { background:#fff; padding:2rem; border-radius:1rem; max-width:900px; width:95%; box-shadow:0 8px 30px rgba(0,0,0,.3); }
+      .popup-content { background:#fff; padding:2rem; border-radius:1rem; max-width:900px; width:95%; box-shadow:0 8px 30px rgba(0,0,0,.3); }
       /* Estilo completo do card de vídeo */
       .video-card { color:black;cursor: pointer;position:relative; border-radius:16px; background: #f8ead3; border: 1px solid ; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.2); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
       .video-card:hover {  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.623); border-color: rgba(255,255,255,0.16); }
@@ -48,7 +48,7 @@
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0" id="navLinks">
-            <li class="nav-item"><a class="nav-link" href="../../buscar-videos/search.html">Vídeos</a></li>
+            <li class="nav-item"><a class="nav-link" href="./index.html">Vídeos</a></li>
             <li class="nav-item" id="navLogin"><a class="nav-link" href="../../login/login.html">Login</a></li>
             <li class="nav-item" id="navRegister"><a class="nav-link" href="../../registrar/register.html">Cadastrar</a></li>
             <li class="nav-item dropdown d-none" id="navUser">
@@ -56,7 +56,7 @@
                 <i class="fa-solid fa-user"></i> <span id="userName">Usuário</span>
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                <li><a class="dropdown-item" href="../../buscar-videos/search.html">Meus Vídeos</a></li>
+                <li><a class="dropdown-item" href="./index.html">Meus Vídeos</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item" id="logoutBtn">Sair</button></li>
               </ul>
@@ -89,6 +89,39 @@
 <section class="py-5">
   <div class="container">
     <h2 class="text-center mb-4">Vídeos disponíveis</h2>
+    
+    <!-- Filtros -->
+    <form id="filterForm" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label class="form-label" for="filterCourt">Quadra</label>
+        <select id="filterCourt" class="form-select">
+          <option value="">Todas</option>
+          <option value="Complexo Esportivo Continental">Complexo Esportivo Continental</option>
+          <option value="Arena M10">Arena M10</option>
+          <option value="Bola de Ouro">Bola de Ouro</option>
+          <option value="Canhoto">Canhoto</option>
+          <option value="Ivanoski">Ivanoski</option>
+          <option value="Paraíso da Bola">Paraíso da Bola</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="filterDate">Data</label>
+        <input type="date" id="filterDate" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Horário</label>
+        <div class="input-group">
+          <input type="time" id="filterStart" class="form-control">
+          <span class="input-group-text">até</span>
+          <input type="time" id="filterEnd" class="form-control">
+        </div>
+      </div>
+      <div class="col-12 d-flex justify-content-end gap-2">
+        <button type="button" id="applyFilters" class="btn btn-primary"><i class="fa-solid fa-filter me-2"></i>Filtrar</button>
+        <button type="button" id="clearFilters" class="btn btn-outline-secondary">Limpar</button>
+      </div>
+    </form>
+
     <div id="videosGrid" class="row g-4"></div>
   </div>
 </section>
@@ -99,7 +132,7 @@
         <span>© 2025 Olha o Replay. Todos os direitos reservados.</span>
         <div class="mt-3 mt-md-0">
           <a href="../../inicio/index.html" class="text-white me-3">Início</a>
-          <a href="../../buscar-videos/search.html" class="text-white me-3">Buscar Vídeos</a>
+          <a href="./index.html" class="text-white me-3">Buscar Vídeos</a>
           <a href="../../historico/purchases.html" class="text-white me-3">Compras</a>
           <a href="#" class="text-white">Contato</a>
         </div>
@@ -119,6 +152,7 @@
         const btnClosePlayer = document.getElementById('btn-close-player');
         let selectedVideo = null;
         let username = 'Usuário';
+        let allVideos = [];
 
         async function loadUser(){
           try {
@@ -130,6 +164,202 @@
           } catch(e) { /* ignora e usa padrão */ }
         }
 
+        async function populateFilters(videos) {
+          const courtSelect = document.getElementById('filterCourt');
+          // Se o select já estiver preenchido com mais de uma opção (além de "Todas"),
+          // presume-se que já temos as quadras inseridas estaticamente e não sobrescrevemos.
+          if (courtSelect.options.length > 1) {
+            // Mas ainda assim vamos popular datas e horários
+            populateDateTimeFilters(videos);
+            return;
+          }
+
+          // Primeiro: tentar buscar a página de início e extrair os nomes das quadras
+          try {
+            const res = await fetch('../../inicio/index.html');
+            if (res.ok) {
+              const html = await res.text();
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              const partnerEls = doc.querySelectorAll('.partner-name, .partner-card h6');
+              const courts = new Set();
+              partnerEls.forEach(el => {
+                const name = (el.textContent || '').trim();
+                if (name) courts.add(name);
+              });
+              if (courts.size) {
+                courts.forEach(courtName => {
+                  const opt = document.createElement('option');
+                  opt.value = courtName;
+                  opt.textContent = courtName;
+                  courtSelect.appendChild(opt);
+                });
+                populateDateTimeFilters(videos);
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn('Não foi possível obter quadras de inicio/index.html:', e);
+          }
+
+          // Fallback: extrair quadras a partir dos nomes dos vídeos
+          const courtsFromVideos = new Map();
+          videos.forEach(video => {
+            const videoObj = typeof video === 'object' ? video : { name: video, mtime: new Date() };
+            const name = videoObj.name;
+            const courtMatch = name.match(/^([^-]+)/);
+            if (courtMatch) {
+              const court = courtMatch[1].trim();
+              if (court) courtsFromVideos.set(court, court);
+            }
+          });
+          courtsFromVideos.forEach(courtName => {
+            const opt = document.createElement('option');
+            opt.value = courtName;
+            opt.textContent = courtName;
+            courtSelect.appendChild(opt);
+          });
+          
+          populateDateTimeFilters(videos);
+        }
+
+        function populateDateTimeFilters(videos) {
+          // Extrair todas as datas e horários únicos dos vídeos
+          const dates = new Set();
+          const times = new Set();
+
+          videos.forEach(video => {
+            const videoObj = typeof video === 'object' ? video : { name: video, birthtime: new Date() };
+            const birthtime = new Date(videoObj.birthtime);
+            
+            // Formato YYYY-MM-DD
+            const day = String(birthtime.getDate()).padStart(2, '0');
+            const month = String(birthtime.getMonth() + 1).padStart(2, '0');
+            const year = birthtime.getFullYear();
+            const dateStr = `${year}-${month}-${day}`;
+            dates.add(dateStr);
+            
+            // Formato HH:MM
+            const hours = String(birthtime.getHours()).padStart(2, '0');
+            const minutes = String(birthtime.getMinutes()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            times.add(timeStr);
+          });
+
+          // Nota: Os inputs de data/horário não têm opções predefinidas,
+          // eles aceitam qualquer valor digitado.
+          // Apenas exibimos no console para debug (opcional)
+          console.log('Datas disponíveis:', Array.from(dates).sort());
+          console.log('Horários disponíveis:', Array.from(times).sort());
+        }
+
+        function renderVideos(videos){
+          grid.innerHTML = '';
+          if(!videos || videos.length === 0){
+            grid.innerHTML = '<p class="text-muted">Nenhum vídeo disponível.</p>';
+            return;
+          }
+
+          videos.forEach(video=>{
+            const videoObj = typeof video === 'object' ? video : { name: video, birthtime: new Date() };
+            const name = videoObj.name;
+            const birthtime = new Date(videoObj.birthtime);
+            
+            const col = document.createElement('div');
+            col.className = 'col-6 col-md-4 col-lg-3';
+            const videoUrl = `/videos/${encodeURIComponent(name)}`;
+            
+            // Formatar data e horário a partir de birthtime (data de criação do arquivo)
+            const day = String(birthtime.getDate()).padStart(2, '0');
+            const month = String(birthtime.getMonth() + 1).padStart(2, '0');
+            const year = birthtime.getFullYear();
+            const hours = String(birthtime.getHours()).padStart(2, '0');
+            const minutes = String(birthtime.getMinutes()).padStart(2, '0');
+            
+            const displayDate = `${day}/${month}/${year}`;
+            const displayTime = `${hours}:${minutes}`;
+            
+            col.innerHTML = `
+              <div class="card video-card h-100" data-video="${encodeURIComponent(name)}">
+                <div class="thumb-box">
+                  <div class="thumb-overlay"><i class="fa-solid fa-play"></i></div>
+                  <div class="ratio ratio-16x9">
+                    <video class="thumb-video" muted preload="metadata" src="${videoUrl}" onloadedmetadata="this.currentTime=1"></video>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="card-title mb-0 text-truncate" title="${name}">${name}</h6>
+                    <span class="badge bg-warning text-dark">R$ 10,00</span>
+                  </div>
+                  <p class="text-muted mb-1">Vendido por: ${username}</p>
+                  <p class="text-muted mb-3">${displayDate} - ${displayTime}</p>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-brand-yellow btn-open-pay">Comprar</button>
+                  </div>
+                </div>
+              </div>`;
+            grid.appendChild(col);
+
+            const openConfirm = ()=>{
+              selectedVideo = name;
+              confirmText.textContent = `Deseja comprar o vídeo "${name}" por R$ 10,00?`;
+              confirmArea.classList.remove('hidden');
+              playerArea.classList.add('hidden');
+              popup.classList.remove('hidden');
+            };
+
+            col.querySelector('.video-card').addEventListener('click', openConfirm);
+            col.querySelector('.btn-open-pay').addEventListener('click', (e)=>{ e.stopPropagation(); openConfirm(); });
+          });
+        }
+
+        function applyFilters() {
+          const court = document.getElementById('filterCourt').value;
+          const date = document.getElementById('filterDate').value;
+          const startTime = document.getElementById('filterStart').value;
+          const endTime = document.getElementById('filterEnd').value;
+
+          const filtered = allVideos.filter(video => {
+            const videoObj = typeof video === 'object' ? video : { name: video, birthtime: new Date() };
+            const name = videoObj.name;
+            const birthtime = new Date(videoObj.birthtime);
+            let match = true;
+            
+            if (court) {
+              match = match && name.startsWith(court);
+            }
+            
+            if (date || startTime || endTime) {
+              // Comparar data: converter birthtime para YYYY-MM-DD
+              const videoDateStr = birthtime.toISOString().split('T')[0]; // YYYY-MM-DD
+              if (date && videoDateStr !== date) {
+                match = false;
+              }
+              
+              if (match && (startTime || endTime)) {
+                const hours = String(birthtime.getHours()).padStart(2, '0');
+                const minutes = String(birthtime.getMinutes()).padStart(2, '0');
+                const videoTime = `${hours}:${minutes}`;
+                if (startTime && videoTime < startTime) match = false;
+                if (endTime && videoTime > endTime) match = false;
+              }
+            }
+            
+            return match;
+          });
+          
+          renderVideos(filtered);
+        }
+
+        function clearFilters() {
+          document.getElementById('filterCourt').value = '';
+          document.getElementById('filterDate').value = '';
+          document.getElementById('filterStart').value = '';
+          document.getElementById('filterEnd').value = '';
+          renderVideos(allVideos);
+        }
+
         async function loadVideos(){
           try{
             const res = await fetch('/api/videos');
@@ -139,46 +369,9 @@
               grid.innerHTML = '<p class="text-muted">Nenhum vídeo disponível.</p>';
               return;
             }
-
-            videos.forEach(name=>{
-              const col = document.createElement('div');
-              col.className = 'col-6 col-md-4 col-lg-3';
-              const videoUrl = `/videos/${encodeURIComponent(name)}`;
-              col.innerHTML = `
-                <div class="card video-card h-100" data-video="${encodeURIComponent(name)}">
-                  <div class="thumb-box">
-                    <div class="thumb-overlay"><i class="fa-solid fa-play"></i></div>
-                    <div class="ratio ratio-16x9">
-                      <video class="thumb-video" muted preload="metadata" src="${videoUrl}" onloadedmetadata="this.currentTime=1"></video>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                      <h6 class="card-title mb-0 text-truncate" title="${name}">${name}</h6>
-                      <span class="badge bg-warning text-dark">R$ 10,00</span>
-                    </div>
-                    <p class="text-muted mb-3">Vendido por: ${username}</p>
-                    <div class="d-flex gap-2">
-                      <button class="btn btn-sm btn-brand-yellow btn-open-pay">Comprar</button>
-                    </div>
-                  </div>
-                </div>`;
-              grid.appendChild(col);
-
-              const openConfirm = ()=>{
-                selectedVideo = name;
-                confirmText.textContent = `Deseja comprar o vídeo "${name}" por R$ 10,00?`;
-                // resetar áreas
-                confirmArea.classList.remove('hidden');
-                playerArea.classList.add('hidden');
-                popup.classList.remove('hidden');
-              };
-
-              // Tornar o card inteiro clicável para abrir a confirmação
-              col.querySelector('.video-card').addEventListener('click', openConfirm);
-              // Botão também abre confirmação, sem duplicar via propagação
-              col.querySelector('.btn-open-pay').addEventListener('click', (e)=>{ e.stopPropagation(); openConfirm(); });
-            });
+            allVideos = videos;
+            await populateFilters(videos);
+            renderVideos(videos);
           }catch(err){
             console.error(err);
             grid.innerHTML = '<p class="text-danger">Erro ao carregar vídeos.</p>';
@@ -188,7 +381,6 @@
         // fechar popup de confirmação sem abrir o player
         btnClose.addEventListener('click', ()=>{
           popup.classList.add('hidden');
-          // garantir que player esteja parado caso tenha sido aberto antes
           try { popupVideo.pause(); popupVideo.src = ''; } catch(e){}
           confirmArea.classList.remove('hidden');
           playerArea.classList.add('hidden');
@@ -198,7 +390,6 @@
         btnComprar.addEventListener('click', ()=>{
           if(!selectedVideo) return;
           const videoUrl = `/videos/${encodeURIComponent(selectedVideo)}`;
-          // mostrar player
           confirmArea.classList.add('hidden');
           playerArea.classList.remove('hidden');
           popupVideo.src = videoUrl;
@@ -215,6 +406,9 @@
           confirmArea.classList.remove('hidden');
           popup.classList.add('hidden');
         });
+
+        document.getElementById('applyFilters').addEventListener('click', applyFilters);
+        document.getElementById('clearFilters').addEventListener('click', clearFilters);
 
         // carregar ao iniciar
         loadUser().then(loadVideos);
