@@ -1,0 +1,14 @@
+{
+  "name": "Olha o Replay",
+  "short_name": "Replay",
+  "start_url": "/inicio/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffd54f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/static/img/OLHA O REPLAY.jpg", "sizes": "192x192", "type": "image/jpeg" },
+    { "src": "/static/img/OLHA O REPLAY.jpg", "sizes": "512x512", "type": "image/jpeg" }
+  ]
+}
