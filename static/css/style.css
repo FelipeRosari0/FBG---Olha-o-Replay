@@ -155,6 +155,7 @@ form .input-group .btn { min-width: 46px; }
   gap: 1.25rem;
 }
 .partner-card {
+  position: relative;
   padding: 16px;
   background: linear-gradient(180deg, #fff 0%, rgba(248,234,211,.35) 100%);
   border: 2px solid rgba(17,17,17,.6);

@@ -18,6 +18,21 @@ app.use(express.static(path.join(__dirname, "public")));
 // arquivos como /static/css/style.css e /static/js/main.js fiquem disponíveis
 app.use('/static', express.static(path.join(__dirname, '..', 'static')));
 
+// Servir todas as páginas HTML do repositório por rotas estáticas
+app.use('/inicio', express.static(path.join(__dirname, '..', 'inicio')));
+app.use('/login', express.static(path.join(__dirname, '..', 'login')));
+app.use('/registrar', express.static(path.join(__dirname, '..', 'registrar')));
+app.use('/historico', express.static(path.join(__dirname, '..', 'historico')));
+app.use('/buscar-videos', express.static(path.join(__dirname, '..', 'buscar-videos')));
+
+// Algumas páginas referenciam diretamente /meu-servidor/public/index.html
+app.use('/meu-servidor/public', express.static(path.join(__dirname, 'public')));
+
+// Rota raiz: redireciona para a página inicial
+app.get('/', (req, res) => {
+  res.redirect('/inicio/index.html');
+});
+
 // Expor nome do usuário do computador
 app.get('/api/user', (req, res) => {
   try {
@@ -35,26 +50,31 @@ app.get("/api/videos", (req, res) => {
   try { localFiles = filterVideos(fs.readdirSync(VIDEO_DIR_LOCAL)); } catch {}
   const all = Array.from(new Set([ ...rootFiles, ...localFiles ]));
   
-  // Retornar array de objetos com nome e data de criação (birthtime)
-  const videos = all.map(fileName => {
+  // Retornar array de objetos com nome e data do arquivo (preferir mtime, sem fallback aleatório)
+  const videos = [];
+  for (const fileName of all) {
+    // Determinar caminho real do arquivo (root primeiro, depois local)
     let videoPath = path.join(VIDEO_DIR_ROOT, fileName);
     if (!fs.existsSync(videoPath)) {
       videoPath = path.join(VIDEO_DIR_LOCAL, fileName);
     }
-    
-    let birthtime = null;
+
+    // Se o arquivo não existir em nenhum dos dois lugares, pular
+    if (!fs.existsSync(videoPath)) continue;
+
     try {
       const stat = fs.statSync(videoPath);
-      birthtime = stat.birthtime; // Data de criação do arquivo
+      // Em alguns sistemas, birthtime pode não refletir a criação original; mtime tende a ser mais confiável.
+      const fileTime = stat.mtime || stat.birthtime;
+      videos.push({
+        name: fileName,
+        birthtime: fileTime
+      });
     } catch (e) {
-      birthtime = new Date(); // Fallback
+      // Se não conseguimos obter stat, não incluir este arquivo para evitar datas incorretas
+      continue;
     }
-    
-    return {
-      name: fileName,
-      birthtime: birthtime
-    };
-  });
+  }
   
   res.json(videos);
 });
