@@ -1,0 +1,117 @@
+GUIA PARA IMPLEMENTAÇÃO DE SISTEMA DE ENVIO DE VÍDEOS POR EMAIL
+
+Este guia descreve como montar um sistema automatizado para enviar o link de download/visualização do vídeo para o email do cliente assim que o pagamento for confirmado.
+
+=== VISÃO GERAL DO FLUXO ===
+1. O cliente realiza o pagamento (simulado ou via PagSeguro).
+2. O sistema recebe a confirmação do pagamento (Webhook ou callback).
+3. O servidor identifica o vídeo comprado e o email do cliente.
+4. O servidor utiliza um serviço de email (SMTP) para enviar uma mensagem com o link.
+
+=== REQUISITOS TÉCNICOS ===
+- Backend: Node.js (já utilizado no projeto) ou Python (Flask).
+- Biblioteca de Email: 'nodemailer' (Node.js) ou 'smtplib' (Python).
+- Serviço de Email: Gmail (para testes), SendGrid, AWS SES ou Mailgun (para produção).
+
+=== PASSO A PASSO (IMPLEMENTAÇÃO EM NODE.JS) ===
+
+1. INSTALAR DEPENDÊNCIAS
+   No terminal, dentro da pasta 'meu-servidor', instale o 'nodemailer':
+   > npm install nodemailer
+
+2. CONFIGURAR O TRANSPORTADOR DE EMAIL
+   No arquivo 'server.js', adicione a configuração do serviço de email.
+   
+   Exemplo usando Gmail (para testes):
+   ------------------------------------------------------------
+   const nodemailer = require('nodemailer');
+
+   const transporter = nodemailer.createTransport({
+       service: 'gmail',
+       auth: {
+           user: 'seu.email@gmail.com',
+           pass: 'sua-senha-de-app-do-google' // Não é a senha normal, é uma senha de aplicativo gerada na conta Google
+       }
+   });
+   ------------------------------------------------------------
+
+3. CRIAR A FUNÇÃO DE ENVIO
+   Adicione uma função para disparar o email.
+
+   ------------------------------------------------------------
+   async function enviarVideoPorEmail(emailCliente, nomeVideo, linkDownload) {
+       const mailOptions = {
+           from: 'seu.email@gmail.com',
+           to: emailCliente,
+           subject: 'Seu Replay Chegou! - Olha o Replay',
+           html: `
+               <h1>Obrigado pela compra!</h1>
+               <p>Aqui está o seu vídeo: <b>${nomeVideo}</b></p>
+               <p>Clique no botão abaixo para assistir ou baixar:</p>
+               <a href="${linkDownload}" style="background-color: #ffd54f; padding: 10px 20px; text-decoration: none; color: black; border-radius: 5px;">
+                   ACESSAR VÍDEO
+               </a>
+               <p>Se tiver dúvidas, responda este email.</p>
+           `
+       };
+
+       try {
+           await transporter.sendMail(mailOptions);
+           console.log('Email enviado com sucesso para ' + emailCliente);
+       } catch (error) {
+           console.error('Erro ao enviar email:', error);
+       }
+   }
+   ------------------------------------------------------------
+
+4. INTEGRAR COM O FLUXO DE PAGAMENTO
+   Quando o pagamento for confirmado (na rota '/payments/confirm' ou no Webhook do PagSeguro), chame a função.
+
+   No arquivo 'server.js', dentro da rota de confirmação:
+   ------------------------------------------------------------
+   app.post('/payments/webhook', (req, res) => {
+       const { status, order_id } = req.body;
+       
+       // Buscar dados do pedido no 'orders.json' usando order_id
+       const pedido = buscarPedido(order_id); 
+
+       if (status === 'paid' && pedido) {
+           // Atualiza status do pedido
+           pedido.status = 'paid';
+           salvarPedidos();
+
+           // Gera o link do vídeo (pode ser um link direto do servidor ou S3)
+           const linkVideo = `https://seusite.com/videos/${pedido.video_id}`;
+
+           // Envia o email
+           enviarVideoPorEmail(pedido.user_email, pedido.video_name, linkVideo);
+       }
+       res.send('OK');
+   });
+   ------------------------------------------------------------
+
+=== DICAS DE SEGURANÇA E PRODUÇÃO ===
+
+1. SENHAS DE APLICATIVO (GMAIL):
+   Se usar Gmail, você precisa ativar a autenticação de dois fatores e gerar uma "Senha de App" em:
+   Conta Google > Segurança > Verificação em duas etapas > Senhas de app.
+
+2. ARMAZENAMENTO DE VÍDEOS:
+   Para produção, evite guardar vídeos no próprio servidor (Node.js). Use serviços como:
+   - AWS S3 (Amazon)
+   - Google Cloud Storage
+   - Vimeo (com links privados)
+
+3. VARIÁVEIS DE AMBIENTE:
+   Nunca deixe seu email e senha escritos diretamente no código (hardcoded). Use um arquivo '.env':
+   
+   EMAIL_USER=seu.email@gmail.com
+   EMAIL_PASS=sua-senha-secreta
+
+   E no código: process.env.EMAIL_USER
+
+4. PAGSEGURO:
+   Para integrar com PagSeguro real, você precisará configurar a URL de Notificação (Webhook) no painel do PagSeguro apontando para seu servidor (ex: https://api.seusite.com/payments/webhook).
+
+=== RESUMO ===
+Este sistema escuta a confirmação de pagamento e dispara automaticamente um email formatado contendo o link do produto digital, garantindo entrega imediata 24/7.
