@@ -1,3 +1,5 @@
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -7,6 +9,55 @@ const PORT = 3000;
 const VIDEO_DIR_ROOT = path.join(__dirname, '..', 'videos');
 const VIDEO_DIR_LOCAL = path.join(__dirname, 'videos');
 const VIDEO_EXTS = new Set(['.mp4', '.webm', '.mov', '.mkv', '.avi']);
+
+// Configuração de transporte de email
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+async function sendVideoEmail(order, req) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log('Credenciais de email ausentes. Pulando envio.');
+    return;
+  }
+  
+  // Tenta usar o campo 'user' como email, ou usa o email do admin como fallback para teste
+  const recipient = order.user.includes('@') ? order.user : process.env.EMAIL_USER;
+  const downloadLink = `${req.protocol}://${req.get('host')}/videos/${encodeURIComponent(order.video)}?download=1`;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h1 style="color: #d4a017;">Olha o Replay - Seu vídeo chegou!</h1>
+      <p>Olá, <strong>${order.user}</strong>!</p>
+      <p>Confirmamos o pagamento do seu vídeo: <strong>${order.video}</strong></p>
+      <p>Clique no botão abaixo para baixar ou assistir:</p>
+      <p>
+        <a href="${downloadLink}" style="display: inline-block; background-color: #ffd54f; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          ACESSAR VÍDEO
+        </a>
+      </p>
+      <p>Ou copie este link: <br><a href="${downloadLink}">${downloadLink}</a></p>
+      <hr>
+      <p><small>Este é um email automático de Olha o Replay.</small></p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Olha o Replay" <${process.env.EMAIL_USER}>`,
+      to: recipient,
+      subject: `Seu vídeo está pronto: ${order.video}`,
+      html: html
+    });
+    console.log(`Email enviado com sucesso para ${recipient}`);
+  } catch (err) {
+    console.error('Erro ao enviar email:', err);
+  }
+}
 
 function filterVideos(files){
   return files.filter(f => VIDEO_EXTS.has(path.extname(f).toLowerCase()));
@@ -168,14 +219,21 @@ app.get('/payments/checkout-page', (req, res) => {
   res.send(`<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pagamento</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></head><body class="p-4"><div class="container" style="max-width:560px"><h3 class="mb-3">Pagamento do vídeo</h3><div class="card mb-3"><div class="card-body"><p class="mb-2"><strong>Vídeo:</strong> ${order.video}</p><p class="mb-2"><strong>Usuário:</strong> ${order.user}</p><p class="mb-3"><strong>Valor:</strong> R$ ${(order.price_cents/100).toFixed(2)}</p><p class="text-muted">Simulação de checkout. Aqui você integrará PagSeguro futuramente.</p><a class="btn btn-success" href="/payments/confirm?order_id=${order.id}">Pagar</a></div></div><a class="btn btn-outline-secondary" href="/meu-servidor/public/index.html">Voltar</a></div></body></html>`);
 });
 
-app.get('/payments/confirm', (req, res) => {
+app.get('/payments/confirm', async (req, res) => {
   const { order_id } = req.query;
   const data = loadOrders();
   const order = data.orders.find(o => o.id === order_id);
   if (!order) return res.status(404).send('Pedido não encontrado');
-  order.status = 'paid';
-  order.paid_at = new Date().toISOString();
-  saveOrders(data);
+  
+  if (order.status !== 'paid') {
+    order.status = 'paid';
+    order.paid_at = new Date().toISOString();
+    saveOrders(data);
+    
+    // Dispara envio de email (sem travar a resposta, ou await se preferir garantir)
+    await sendVideoEmail(order, req);
+  }
+  
   res.redirect(`/payments/thankyou?order_id=${order.id}`);
 });
 
