@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log("Iniciando servidor...");
 const nodemailer = require('nodemailer');
 const express = require("express");
 const fs = require("fs");
@@ -24,9 +25,16 @@ async function sendVideoEmail(order, req) {
     console.log('Credenciais de email ausentes. Pulando envio.');
     return;
   }
+
+  // Prioriza o email salvo no pedido, depois tenta o user se for email, por fim o admin (fallback)
+  const recipient = order.email || (order.user.includes('@') ? order.user : process.env.EMAIL_USER);
   
-  // Tenta usar o campo 'user' como email, ou usa o email do admin como fallback para teste
-  const recipient = order.user.includes('@') ? order.user : process.env.EMAIL_USER;
+  if (!recipient) {
+    console.log('Nenhum destinatário de email definido.');
+    return;
+  }
+  
+  console.log(`Enviando email do vídeo ${order.video} para ${recipient}...`);
   const downloadLink = `${req.protocol}://${req.get('host')}/videos/${encodeURIComponent(order.video)}?download=1`;
   
   const html = `
@@ -199,12 +207,23 @@ function saveOrders(data){
 }
 
 app.post('/payments/checkout', (req, res) => {
-  const { video, user, price_cents } = req.body || {};
+  const { video, user, email, price_cents } = req.body || {};
   if (!video || !user) return res.status(400).json({ error: 'video e user são obrigatórios' });
   const data = loadOrders();
   const id = Math.random().toString(36).slice(2);
   const now = new Date().toISOString();
-  const order = { id, video, user, price_cents: price_cents || 1000, status: 'pending', created_at: now };
+  // Se não vier email, tenta usar o user se parecer um email, senão deixa em branco ou usa o do admin como fallback no envio
+  const orderEmail = email || (user.includes('@') ? user : null);
+  
+  const order = { 
+    id, 
+    video, 
+    user, 
+    email: orderEmail, // Salva o email do comprador
+    price_cents: price_cents || 1000, 
+    status: 'pending', 
+    created_at: now 
+  };
   data.orders.push(order);
   saveOrders(data);
   const redirect_url = `/payments/checkout-page?order_id=${id}`;
