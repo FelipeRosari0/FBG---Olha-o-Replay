@@ -285,95 +285,11 @@
   }
 
   function updateNavbar() {
-    const user = getCurrentUser();
-    const navLogin = document.getElementById('navLogin');
-    const navRegister = document.getElementById('navRegister');
-    const navUser = document.getElementById('navUser');
-    const userName = document.getElementById('userName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (!navUser) return; // not loaded
-
-    if (user) {
-      navLogin?.classList.add('d-none');
-      navRegister?.classList.add('d-none');
-      navUser?.classList.remove('d-none');
-      if (userName) userName.textContent = user.username || user.email;
-      logoutBtn?.addEventListener('click', () => {
-        logout();
-        location.href = '../inicio/index.html';
-      });
-    } else {
-      navLogin?.classList.remove('d-none');
-      navRegister?.classList.remove('d-none');
-      navUser?.classList.add('d-none');
-    }
-
-    // Index hero CTA
-    const heroCta = document.getElementById('heroCtaRegister');
-    if (heroCta) {
-      if (user) heroCta.classList.add('d-none');
-      else heroCta.classList.remove('d-none');
-    }
+    // Login functionality removed
   }
 
-  // Login page
-  function initLogin() {
-    const form = document.getElementById('loginForm');
-    if (!form) return;
-    const emailEl = document.getElementById('loginEmail');
-    const passEl = document.getElementById('loginPassword');
-    const toggleBtn = document.getElementById('toggleLoginPassword');
-    const alertContainer = document.getElementById('alertContainer');
+  // Login and Register pages removed
 
-    toggleBtn?.addEventListener('click', () => {
-      if (passEl.type === 'password') { passEl.type = 'text'; toggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>'; }
-      else { passEl.type = 'password'; toggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>'; }
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-      if (!email || !password) { showAlert(alertContainer, 'Preencha email e senha.', 'warning'); return; }
-      if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
-      const users = getLS(LS_KEYS.users, []);
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      if (!user) { showAlert(alertContainer, 'Credenciais inválidas.', 'danger'); return; }
-      setCurrentUser(user);
-      showAlert(alertContainer, 'Login realizado com sucesso! Redirecionando...', 'success');
-      setTimeout(() => location.href = '../inicio/index.html', 800);
-    });
-  }
-
-  // Register page
-  function initRegister() {
-    const form = document.getElementById('registerForm');
-    if (!form) return;
-    const usernameEl = document.getElementById('regUsername');
-    const emailEl = document.getElementById('regEmail');
-    const passEl = document.getElementById('regPassword');
-    const confirmEl = document.getElementById('regConfirm');
-    const alertContainer = document.getElementById('alertContainer');
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = usernameEl.value.trim();
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-      const confirm = confirmEl.value;
-      if (!username || !email || !password || !confirm) { showAlert(alertContainer, 'Preencha todos os campos.', 'warning'); return; }
-      if (!isValidEmail(email)) { showAlert(alertContainer, 'Email inválido.', 'danger'); return; }
-      if (password !== confirm) { showAlert(alertContainer, 'As senhas não coincidem.', 'danger'); return; }
-      const users = getLS(LS_KEYS.users, []);
-      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) { showAlert(alertContainer, 'Email já cadastrado.', 'danger'); return; }
-      const newUser = { username, email, password };
-      users.push(newUser);
-      setLS(LS_KEYS.users, users);
-      setCurrentUser(newUser);
-      showAlert(alertContainer, 'Cadastro concluído! Redirecionando...', 'success');
-      setTimeout(() => location.href = '../inicio/index.html', 800);
-    });
-  }
 
   // Purchases helpers
   function isPurchased(email, videoId) {
@@ -651,8 +567,8 @@
   function init() {
     ensureSeed();
     updateNavbar();
-    initLogin();
-    initRegister();
+    // initLogin();
+    // initRegister();
     initSearch();
     initPurchases();
   }

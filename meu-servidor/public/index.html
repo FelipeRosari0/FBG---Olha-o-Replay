@@ -51,18 +51,6 @@
         <div class="collapse navbar-collapse" id="mainNav">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0" id="navLinks">
             <li class="nav-item"><a class="nav-link" href="./index.html">Vídeos</a></li>
-            <li class="nav-item" id="navLogin"><a class="nav-link" href="../../login/login.html">Login</a></li>
-            <li class="nav-item" id="navRegister"><a class="nav-link" href="../../registrar/register.html">Cadastrar</a></li>
-            <li class="nav-item dropdown d-none" id="navUser">
-              <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-user"></i> <span id="userName">Usuário</span>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                <li><a class="dropdown-item" href="./index.html">Meus Vídeos</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item" id="logoutBtn">Sair</button></li>
-              </ul>
-            </li>
           </ul>
         </div>
       </div>
@@ -112,6 +100,7 @@
           <option value="Ivanoski">Ivanoski</option>
           <option value="Paraíso da Bola">Paraíso da Bola</option>
           <option value="Arena DFC">Arena DFC</option>
+          <option value="Outros">Outros</option>
         </select>
       </div>
       <div class="col-md-4">
@@ -176,54 +165,26 @@
 
         async function populateFilters(videos) {
           const courtSelect = document.getElementById('filterCourt');
-          // Se o select já estiver preenchido com mais de uma opção (além de "Todas"),
-          // presume-se que já temos as quadras inseridas estaticamente e não sobrescrevemos.
-          if (courtSelect.options.length > 1) {
-            // Mas ainda assim vamos popular datas e horários
-            populateDateTimeFilters(videos);
-            return;
+          
+          // Lista fixa de todas as quadras para garantir que apareçam no filtro
+          const ALL_COURTS = [
+            'Complexo Esportivo Continental',
+            'Arena M10',
+            'Bola de Ouro',
+            'Canhoto',
+            'Ivanoski',
+            'Paraíso da Bola',
+            'Arena DFC',
+            'Outros'
+          ];
+
+          // Limpar opções existentes (exceto "Todas")
+          while(courtSelect.options.length > 1) {
+             courtSelect.remove(1);
           }
 
-          // Primeiro: tentar buscar a página de início e extrair os nomes das quadras
-          try {
-            const res = await fetch('../../inicio/index.html');
-            if (res.ok) {
-              const html = await res.text();
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(html, 'text/html');
-              const partnerEls = doc.querySelectorAll('.partner-name, .partner-card h6');
-              const courts = new Set();
-              partnerEls.forEach(el => {
-                const name = (el.textContent || '').trim();
-                if (name) courts.add(name);
-              });
-              if (courts.size) {
-                courts.forEach(courtName => {
-                  const opt = document.createElement('option');
-                  opt.value = courtName;
-                  opt.textContent = courtName;
-                  courtSelect.appendChild(opt);
-                });
-                populateDateTimeFilters(videos);
-                return;
-              }
-            }
-          } catch (e) {
-            console.warn('Não foi possível obter quadras de inicio/index.html:', e);
-          }
-
-          // Fallback: extrair quadras a partir dos nomes dos vídeos
-          const courtsFromVideos = new Map();
-          videos.forEach(video => {
-            const videoObj = typeof video === 'object' ? video : { name: video, mtime: new Date() };
-            const name = videoObj.name;
-            const courtMatch = name.match(/^([^-]+)/);
-            if (courtMatch) {
-              const court = courtMatch[1].trim();
-              if (court) courtsFromVideos.set(court, court);
-            }
-          });
-          courtsFromVideos.forEach(courtName => {
+          // Adicionar todas as quadras fixas
+          ALL_COURTS.forEach(courtName => {
             const opt = document.createElement('option');
             opt.value = courtName;
             opt.textContent = courtName;
@@ -256,11 +217,8 @@
             times.add(timeStr);
           });
 
-          // Nota: Os inputs de data/horário não têm opções predefinidas,
-          // eles aceitam qualquer valor digitado.
-          // Apenas exibimos no console para debug (opcional)
+          // Debug only
           console.log('Datas disponíveis:', Array.from(dates).sort());
-          console.log('Horários disponíveis:', Array.from(times).sort());
         }
 
         function renderVideos(videos){
@@ -273,11 +231,17 @@
           videos.forEach(video=>{
             const videoObj = typeof video === 'object' ? video : { name: video, birthtime: new Date() };
             const name = videoObj.name;
+            const court = videoObj.court || 'Outros';
             const birthtime = new Date(videoObj.birthtime);
             
             const col = document.createElement('div');
             col.className = 'col-6 col-md-4 col-lg-3';
-            const videoUrl = `/videos/${encodeURIComponent(name)}`;
+            
+            // Construir URL segura mantendo a estrutura de pasta/arquivo
+            const relativePath = videoObj.relativePath || name;
+            // Codificar cada parte do caminho separadamente para não codificar a barra '/'
+            const safePath = relativePath.split('/').map(part => encodeURIComponent(part)).join('/');
+            const videoUrl = `/videos/${safePath}`;
             
             // Formatar data e horário a partir de birthtime (data de criação do arquivo)
             const day = String(birthtime.getDate()).padStart(2, '0');
@@ -302,6 +266,7 @@
                     <h6 class="card-title mb-0 text-truncate" title="${name}">${name}</h6>
                     <span class="badge bg-warning text-dark">R$ 10,00</span>
                   </div>
+                  <p class="text-muted mb-1"><small><i class="fa-solid fa-location-dot"></i> ${court}</small></p>
                   <p class="text-muted mb-1">Vendido por: ${username}</p>
                   <p class="text-muted mb-3">${displayDate} - ${displayTime}</p>
                   <div class="d-flex gap-2">
@@ -332,12 +297,11 @@
 
           const filtered = allVideos.filter(video => {
             const videoObj = typeof video === 'object' ? video : { name: video, birthtime: new Date() };
-            const name = videoObj.name;
             const birthtime = new Date(videoObj.birthtime);
             let match = true;
             
             if (court) {
-              match = match && name.startsWith(court);
+              match = match && (videoObj.court === court);
             }
             
             if (date || startTime || endTime) {

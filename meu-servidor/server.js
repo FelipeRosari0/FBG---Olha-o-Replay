@@ -79,9 +79,6 @@ app.use('/static', express.static(path.join(__dirname, '..', 'static')));
 
 // Servir todas as páginas HTML do repositório por rotas estáticas
 app.use('/inicio', express.static(path.join(__dirname, '..', 'inicio')));
-app.use('/login', express.static(path.join(__dirname, '..', 'login')));
-app.use('/registrar', express.static(path.join(__dirname, '..', 'registrar')));
-app.use('/historico', express.static(path.join(__dirname, '..', 'historico')));
 app.use('/buscar-videos', express.static(path.join(__dirname, '..', 'buscar-videos')));
 
 // Algumas páginas referenciam diretamente /meu-servidor/public/index.html
@@ -102,59 +99,94 @@ app.get('/api/user', (req, res) => {
   }
 });
 
+const COURT_MAPPING = {
+  'continental': 'Complexo Esportivo Continental',
+  'arena-m10': 'Arena M10',
+  'bola-de-ouro': 'Bola de Ouro',
+  'canhoto': 'Canhoto',
+  'ivanoski': 'Ivanoski',
+  'paraiso': 'Paraíso da Bola',
+  'arena-dfc': 'Arena DFC',
+  'outros': 'Outros'
+};
+
 app.get("/api/videos", (req, res) => {
-  let rootFiles = [];
-  let localFiles = [];
-  try { rootFiles = filterVideos(fs.readdirSync(VIDEO_DIR_ROOT)); } catch {}
-  try { localFiles = filterVideos(fs.readdirSync(VIDEO_DIR_LOCAL)); } catch {}
-  const all = Array.from(new Set([ ...rootFiles, ...localFiles ]));
-  
-  // Retornar array de objetos com nome e data do arquivo (preferir mtime, sem fallback aleatório)
   const videos = [];
-  for (const fileName of all) {
-    // Determinar caminho real do arquivo (root primeiro, depois local)
-    let videoPath = path.join(VIDEO_DIR_ROOT, fileName);
-    if (!fs.existsSync(videoPath)) {
-      videoPath = path.join(VIDEO_DIR_LOCAL, fileName);
-    }
+  const processedFiles = new Set();
 
-    // Se o arquivo não existir em nenhum dos dois lugares, pular
-    if (!fs.existsSync(videoPath)) continue;
+  function scanDirectory(baseDir, isRoot = false) {
+    if (!fs.existsSync(baseDir)) return;
+    
+    let items;
+    try { items = fs.readdirSync(baseDir); } catch(e) { return; }
 
-    try {
-      const stat = fs.statSync(videoPath);
-      // Em alguns sistemas, birthtime pode não refletir a criação original; mtime tende a ser mais confiável.
-      const fileTime = stat.mtime || stat.birthtime;
-      videos.push({
-        name: fileName,
-        birthtime: fileTime
-      });
-    } catch (e) {
-      // Se não conseguimos obter stat, não incluir este arquivo para evitar datas incorretas
-      continue;
+    for (const item of items) {
+      const fullPath = path.join(baseDir, item);
+      let stat;
+      try { stat = fs.statSync(fullPath); } catch(e) { continue; }
+
+      if (stat.isDirectory() && isRoot) {
+        // Se estamos na raiz, entrar nas subpastas (quadras)
+        const folderName = item;
+        const prettyName = COURT_MAPPING[folderName.toLowerCase()] || folderName;
+        
+        try {
+          const subItems = fs.readdirSync(fullPath);
+          for (const subItem of subItems) {
+             const subPath = path.join(fullPath, subItem);
+             if (VIDEO_EXTS.has(path.extname(subItem).toLowerCase())) {
+               // Evitar duplicatas se existirem em ROOT e LOCAL
+               const uniqueKey = `${folderName}/${subItem}`;
+               if (processedFiles.has(uniqueKey)) continue;
+               processedFiles.add(uniqueKey);
+
+               let subStat;
+               try { subStat = fs.statSync(subPath); } catch { subStat = { mtime: new Date() }; }
+
+               videos.push({
+                 name: subItem,
+                 court: prettyName,
+                 relativePath: `${folderName}/${subItem}`,
+                 birthtime: subStat.mtime || subStat.birthtime
+               });
+             }
+          }
+        } catch(e) {}
+      } else if (VIDEO_EXTS.has(path.extname(item).toLowerCase())) {
+        // Arquivo solto na raiz
+        if (processedFiles.has(item)) continue;
+        processedFiles.add(item);
+
+        videos.push({
+          name: item,
+          court: 'Outros',
+          relativePath: item,
+          birthtime: stat.mtime || stat.birthtime
+        });
+      }
     }
   }
-  
+
+  // Escanear ROOT primeiro (prioridade)
+  scanDirectory(VIDEO_DIR_ROOT, true);
+  // Escanear LOCAL depois (fallback)
+  scanDirectory(VIDEO_DIR_LOCAL, true);
+
   res.json(videos);
 });
 
-app.get("/videos/:video", (req, res) => {
-  const requested = path.basename(req.params.video);
-  let videoPath = path.join(VIDEO_DIR_ROOT, requested);
-  if (!fs.existsSync(videoPath)) {
-    videoPath = path.join(VIDEO_DIR_LOCAL, requested);
-  }
+function serveVideoFile(req, res, videoPath) {
   fs.access(videoPath, fs.constants.F_OK, (err) => {
     if (err) return res.status(404).send("Vídeo não encontrado.");
 
     const stat = fs.statSync(videoPath);
     const fileSize = stat.size;
     const range = req.headers.range;
+    const fileName = path.basename(videoPath);
     
-    // Se download=1, forçar download como anexo
     if (req.query.download === '1') {
       res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Disposition', `attachment; filename="${req.params.video}"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       fs.createReadStream(videoPath).pipe(res);
       return;
     }
@@ -182,6 +214,49 @@ app.get("/videos/:video", (req, res) => {
       fs.createReadStream(videoPath).pipe(res);
     }
   });
+}
+
+// Rota para vídeos em subpastas (ex: /videos/arena-m10/video.mp4)
+app.get("/videos/:folder/:video", (req, res) => {
+  const { folder, video } = req.params;
+  // Segurança básica contra directory traversal
+  if (folder.includes('..') || video.includes('..')) return res.status(403).send('Acesso negado.');
+
+  // Tentar no ROOT primeiro
+  let videoPath = path.join(VIDEO_DIR_ROOT, folder, video);
+  if (!fs.existsSync(videoPath)) {
+    videoPath = path.join(VIDEO_DIR_LOCAL, folder, video);
+  }
+  
+  serveVideoFile(req, res, videoPath);
+});
+
+// Rota legado/raiz
+app.get("/videos/:video", (req, res) => {
+  const requested = path.basename(req.params.video);
+  
+  // Tentar achar na raiz
+  let videoPath = path.join(VIDEO_DIR_ROOT, requested);
+  if (!fs.existsSync(videoPath)) {
+     videoPath = path.join(VIDEO_DIR_LOCAL, requested);
+  }
+
+  // Se não achou na raiz, tentar procurar em subpastas (fallback inteligente)
+  if (!fs.existsSync(videoPath)) {
+     // Tentar encontrar em subpastas do ROOT
+     try {
+       const subdirs = fs.readdirSync(VIDEO_DIR_ROOT).filter(d => fs.statSync(path.join(VIDEO_DIR_ROOT, d)).isDirectory());
+       for (const dir of subdirs) {
+         const p = path.join(VIDEO_DIR_ROOT, dir, requested);
+         if (fs.existsSync(p)) {
+           videoPath = p;
+           break;
+         }
+       }
+     } catch {}
+  }
+
+  serveVideoFile(req, res, videoPath);
 });
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -277,4 +352,4 @@ app.post('/payments/webhook', (req, res) => {
   res.status(200).json({ ok: true });
 });
 
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Servidor rodando em http://0.0.0.0:${PORT}`));
